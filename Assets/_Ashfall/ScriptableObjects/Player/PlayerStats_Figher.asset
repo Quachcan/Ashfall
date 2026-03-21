@@ -12,23 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c15de02d23c4ef1bb7dc80db5725932, type: 3}
   m_Name: PlayerStats_Figher
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Player.PlayerStats
-  moveSpeed: 6
+  moveSpeed: 10
+  walkSpeed: 2
+  runSpeed: 6.5
   acceleration: 20
   deceleration: 25
-  jumpForce: 14
+  sprintAcceleration: 20
+  jumpForce: 6.5
+  maxJumps: 1
   coyoteTime: 0.12
-  maxJumps: 2
-  fallGravityMultiplier: 2.5
+  fallGravityMultiplier: 3.5
   lowJumpMultiplier: 2
-  dashSpeed: 18
-  dashDuration: 0.18
+  dashSpeed: 22
+  dashDuration: 0.26
   dashCooldown: 0.6
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  groundCheckOffset: {x: 0, y: 0, z: 0}
+  groundCheckOffset: {x: 0, y: 0.1, z: 0}
   groundCheckRadius: 0.25
   wallLayer:
     serializedVersion: 2
-    m_Bits: 0
-  wallCheckDistance: 0.4
+    m_Bits: 64
+  wallCheckDistance: 0.8

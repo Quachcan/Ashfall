@@ -22,14 +22,20 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         {
             // Stop horizontal movement
             SetHorizontalVelocity(0f);
-            _ctx.Animator?.SetBool(AnimHash.IsRunning, false);
-            _ctx.Animator?.SetBool(AnimHash.IsGrounded, true);
+            _ctx.AnimMoveSpeed = 0f;
         }
 
         public void Exit() { }
 
         public void Tick()
         {
+            if (_ctx.Input.CrouchToggled)
+            {
+                _ctx.Input.ConsumeCrouch();
+                _controller.ChangeState(PlayerState.CrouchIdle);
+                return;
+            }
+            
             // Jump input
             if (_ctx.Input.JumpPressed)
             {
@@ -64,7 +70,9 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void FixedTick()
         {
-            // Transition to Fall if walked off a ledge
+            // Transition to Fall if walked off a ledge.
+            // IsGroundedOrCoyote gives a small window so we don't
+            // flicker into Fall on the very frame we step off an edge.
             if (!_ctx.IsGroundedOrCoyote)
             {
                 _controller.ChangeState(PlayerState.Fall);

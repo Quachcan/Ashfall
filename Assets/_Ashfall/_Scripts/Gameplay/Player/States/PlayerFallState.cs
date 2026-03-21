@@ -21,15 +21,11 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void Enter()
         {
-            _ctx.Animator?.SetBool(AnimHash.IsGrounded, false);
-            _ctx.Animator?.SetTrigger(AnimHash.Fall);
+            // VerticalVelocity float drives the Airborne SSM blend automatically
+            // No trigger needed — IsGrounded bool handles SSM transition
         }
 
-        public void Exit()
-        {
-            if (_ctx.JustLanded)
-                _ctx.Animator?.SetTrigger(AnimHash.Land);
-        }
+        public void Exit() { }
 
         public void Tick()
         {
@@ -43,10 +39,8 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 _controller.ChangeState(PlayerState.Jump);
                 return;
             }
-            else
-            {
-                _ctx.Input.ConsumeJump();
-            }
+
+            _ctx.Input.ConsumeJump();
 
             // Dash in air
             if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown)

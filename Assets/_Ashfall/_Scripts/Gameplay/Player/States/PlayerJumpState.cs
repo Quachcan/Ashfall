@@ -34,7 +34,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Consume coyote window so it can't be used again this airborne sequence
             _ctx.CoyoteTimeCounter = 0f;
 
-            _ctx.Animator?.SetBool(AnimHash.IsGrounded, false);
+            _ctx.AnimMoveSpeed = 0f;
             _ctx.Animator?.SetTrigger(AnimHash.Jump);
         }
 
@@ -45,18 +45,15 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Air horizontal flip
             _controller.SetFacingDirection(_ctx.Input.MoveX);
 
-            // Double jump
+            // Double jump — buffer keeps JumpPressed true for a short window
+            // so rapid button presses are never missed.
+            // ForceJump() handles re-entering the same Jump state which
+            // StateMachine.ChangeState() would normally block.
             if (_ctx.Input.JumpPressed && _ctx.JumpsUsed < _ctx.Stats.maxJumps)
             {
                 _ctx.Input.ConsumeJump();
-                // Re-enter Jump state for the double jump — resets velocity and re-applies force
-                _controller.ChangeState(PlayerState.Jump);
+                _controller.ForceJump();
                 return;
-            }
-            else
-            {
-                // Consume any extra jump press so it doesn't carry over
-                _ctx.Input.ConsumeJump();
             }
 
             // Dash in air

@@ -19,15 +19,11 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             _ctx        = ctx;
         }
 
-        public void Enter()
-        {
-            _ctx.Animator?.SetBool(AnimHash.IsRunning, true);
-            _ctx.Animator?.SetBool(AnimHash.IsGrounded, true);
-        }
+        public void Enter() { }
 
         public void Exit()
         {
-            _ctx.Animator?.SetBool(AnimHash.IsRunning, false);
+            _ctx.AnimMoveSpeed = 0f;
         }
 
         public void Tick()
@@ -35,6 +31,13 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Flip sprite to face movement direction
             _controller.SetFacingDirection(_ctx.Input.MoveX);
 
+            if (_ctx.Input.CrouchToggled)
+            {
+                _ctx.Input.ConsumeCrouch();
+                _controller.ChangeState(PlayerState.CrouchIdle);
+                return;
+            }
+            
             // Jump input
             if (_ctx.Input.JumpPressed)
             {
@@ -43,7 +46,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 return;
             }
 
-            // Dash input
+            // Dash input — only triggers on tap, not hold (handled in InputHandler)
             if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown)
             {
                 _ctx.Input.ConsumeDash();
@@ -58,10 +61,23 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 _controller.ChangeState(PlayerState.Attack);
                 return;
             }
+            
+            if (_ctx.Input.IsCrouching)
+            {
+                _controller.ChangeState(
+                    Mathf.Abs(_ctx.Input.MoveX) > 0.1f
+                        ? PlayerState.CrouchWalk
+                        : PlayerState.CrouchIdle);
+                return;
+            }
 
             // No input → Idle
             if (Mathf.Abs(_ctx.Input.MoveX) < 0.1f)
             {
+                // If was sprinting, consume sprint on stop
+                if (_ctx.Input.SprintHeld)
+                    _ctx.Input.ConsumeSprint();
+
                 _controller.ChangeState(PlayerState.Idle);
                 return;
             }
@@ -69,7 +85,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void FixedTick()
         {
-            // Fall off ledge
+            // Fall off ledge — use coyote window to avoid instant Fall on edge
             if (!_ctx.IsGroundedOrCoyote)
             {
                 _controller.ChangeState(PlayerState.Fall);
@@ -83,20 +99,43 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         private void ApplyMovement()
         {
-            float input      = _ctx.Input.MoveX;
-            float targetVelX = input * _ctx.Stats.moveSpeed;
+            float input       = _ctx.Input.MoveX;
+            bool  isSprinting = _ctx.Input.SprintHeld && Mathf.Abs(input) > 0.1f;
+
+            // Sprint uses moveSpeed as target, run uses runSpeed as target
+            float topSpeed   = isSprinting ? _ctx.Stats.moveSpeed : _ctx.Stats.runSpeed;
+            float targetVelX = input * topSpeed;
             float currentVelX = _ctx.Rb.linearVelocity.x;
 
-            // Use acceleration when there's input, deceleration when stopping
-            float rate = Mathf.Abs(input) > 0.1f
-                ? _ctx.Stats.acceleration
-                : _ctx.Stats.deceleration;
+            float rate;
+            if (Mathf.Abs(input) < 0.1f)
+                rate = _ctx.Stats.deceleration;
+            else if (isSprinting && Mathf.Abs(currentVelX) >= _ctx.Stats.runSpeed)
+                rate = _ctx.Stats.sprintAcceleration; // slower ramp-up into sprint
+            else
+                rate = _ctx.Stats.acceleration;
 
             float newVelX = Mathf.MoveTowards(currentVelX, targetVelX, rate * Time.fixedDeltaTime);
 
             Vector3 v = _ctx.Rb.linearVelocity;
             v.x = newVelX;
             _ctx.Rb.linearVelocity = v;
+
+            // Map actual speed → Blend Tree value
+            // 0 = Idle | 1 = Walk | 2 = Run | 3 = Sprint
+            float absSpeed = Mathf.Abs(newVelX);
+            float animSpeed;
+
+            if (absSpeed < 0.1f)
+                animSpeed = 0f;
+            else if (absSpeed < _ctx.Stats.walkSpeed)
+                animSpeed = Mathf.InverseLerp(0f, _ctx.Stats.walkSpeed, absSpeed);
+            else if (absSpeed < _ctx.Stats.runSpeed)
+                animSpeed = 1f + Mathf.InverseLerp(_ctx.Stats.walkSpeed, _ctx.Stats.runSpeed, absSpeed);
+            else
+                animSpeed = 2f + Mathf.InverseLerp(_ctx.Stats.runSpeed, _ctx.Stats.moveSpeed, absSpeed);
+
+            _ctx.AnimMoveSpeed = Mathf.Clamp(animSpeed, 0f, 3f);
         }
     }
 }

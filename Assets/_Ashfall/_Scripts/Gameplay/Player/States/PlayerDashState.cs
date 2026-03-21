@@ -39,6 +39,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Disable gravity during dash for consistent distance
             _ctx.Rb.useGravity = false;
 
+            _ctx.AnimMoveSpeed = 0f;
             _ctx.Animator?.SetTrigger(AnimHash.Dash);
 
             // TODO: enable i-frames via combat system
@@ -50,6 +51,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Re-enable gravity when dash ends
             _ctx.Rb.useGravity = true;
 
+            _ctx.Input.ClearCrouch();
             // TODO: disable i-frames
             // _ctx.Combat.SetInvincible(false);
         }
@@ -68,19 +70,33 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         private void EndDash()
         {
-            // Bleed off dash speed so landing doesn't feel floaty
+            // Bleed off dash speed
             Vector3 v = _ctx.Rb.linearVelocity;
-            v.x = _ctx.FacingDirection * _ctx.Stats.moveSpeed;
+            v.x = _ctx.FacingDirection * _ctx.Stats.runSpeed;
             _ctx.Rb.linearVelocity = v;
 
-            if (_ctx.IsGrounded)
+            bool hasInput = Mathf.Abs(_ctx.Input.MoveX) > 0.1f;
+
+            if (!_ctx.IsGrounded)
             {
-                bool hasInput = Mathf.Abs(_ctx.Input.MoveX) > 0.1f;
-                _controller.ChangeState(hasInput ? PlayerState.Run : PlayerState.Idle);
+                _controller.ChangeState(PlayerState.Fall);
+                return;
+            }
+
+            if (hasInput && _ctx.Input.DashHeld)
+            {
+                // Still holding Shift after dash → transition into sprint
+                _ctx.Input.ConsumeSprint();
+                _ctx.Input.SprintHeld = true; // manually activate sprint
+                _controller.ChangeState(PlayerState.Run);
+            }
+            else if (hasInput)
+            {
+                _controller.ChangeState(PlayerState.Run);
             }
             else
             {
-                _controller.ChangeState(PlayerState.Fall);
+                _controller.ChangeState(PlayerState.Idle);
             }
         }
     }
