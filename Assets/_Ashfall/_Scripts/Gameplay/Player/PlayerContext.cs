@@ -10,24 +10,44 @@ namespace _Ashfall._Scripts.Gameplay.Player
     public class PlayerContext
     {
         // ── Core Components ───────────────────────────────────────────────
-        public readonly Rigidbody       Rb;
-        public readonly Transform       Transform;
-        public readonly Animator        Animator;
+        public readonly Rigidbody          Rb;
+        public readonly Transform          Transform;
+        public readonly Animator           Animator;
         public readonly PlayerInputHandler Input;
-        public readonly PlayerStats     Stats;
-        public readonly CapsuleCollider  Collider;
+        public readonly PlayerStats        Stats;
+        public readonly CapsuleCollider    Collider;
+        public readonly StaminaSystem      Stamina;
 
         // ── Shared Runtime State ──────────────────────────────────────────
 
         /// <summary>Current facing direction: +1 = right, -1 = left.</summary>
         public float FacingDirection { get; set; } = 1f;
+
+        /// <summary>True while the player is in a crouch state.</summary>
         public bool IsCrouching { get; set; }
+
+        /// <summary>True when the player is touching the ground this frame.</summary>
         public bool IsGrounded { get; set; }
+
+        /// <summary>
+        /// Coyote time counter — counts down after leaving the ground.
+        /// States should use IsGrounded || CoyoteTimeCounter > 0 for jump eligibility.
+        /// </summary>
         public float CoyoteTimeCounter { get; set; }
+
+        /// <summary>How long coyote time lasts in seconds (set from PlayerStats).</summary>
         public float CoyoteTimeDuration { get; set; }
+
+        /// <summary>True if player is considered "on ground" including coyote window.</summary>
         public bool IsGroundedOrCoyote => IsGrounded || CoyoteTimeCounter > 0f;
+
+        /// <summary>True when the player is touching a wall this frame.</summary>
         public bool IsTouchingWall { get; set; }
+
+        /// <summary>How many jumps have been used in the current airborne sequence.</summary>
         public int JumpsUsed { get; set; }
+
+        /// <summary>True for one FixedUpdate frame after landing (used by states to trigger land FX).</summary>
         public bool JustLanded { get; set; }
 
         // ── Animator Driver Values ────────────────────────────────────────
@@ -52,12 +72,13 @@ namespace _Ashfall._Scripts.Gameplay.Player
         // ── Constructor ───────────────────────────────────────────────────
 
         public PlayerContext(
-            Rigidbody       rb,
-            Transform       transform,
-            Animator        animator,
+            Rigidbody          rb,
+            Transform          transform,
+            Animator           animator,
             PlayerInputHandler input,
-            PlayerStats     stats,
-            CapsuleCollider collider)
+            PlayerStats        stats,
+            CapsuleCollider    collider,
+            StaminaSystem      stamina)
         {
             Rb        = rb;
             Transform = transform;
@@ -65,6 +86,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
             Input     = input;
             Stats     = stats;
             Collider  = collider;
+            Stamina   = stamina;
         }
     }
 }

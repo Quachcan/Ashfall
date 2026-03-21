@@ -26,6 +26,10 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         {
             _dashTimer = _ctx.Stats.dashDuration;
 
+            // Spend stamina — guaranteed to succeed because DashState is only entered
+            // after Has(dashCost) check in the originating state
+            _ctx.Stamina.TrySpendDash();
+
             // Arm cooldown immediately so it ticks even if the state exits early
             _ctx.IsDashOnCooldown  = true;
             _ctx.DashCooldownTimer = _ctx.Stats.dashCooldown;
@@ -51,7 +55,9 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Re-enable gravity when dash ends
             _ctx.Rb.useGravity = true;
 
+            // Dash always exits to standing states — clear crouch regardless of how dash was entered
             _ctx.Input.ClearCrouch();
+
             // TODO: disable i-frames
             // _ctx.Combat.SetInvincible(false);
         }

@@ -174,6 +174,40 @@ namespace _Ashfall._Scripts.Gameplay.Player
 #endif
         }
 
+        // ── Stamina ───────────────────────────────────────────────────────
+
+        [TitleGroup("Stamina")]
+        [BoxGroup("Stamina/Box")]
+        [HorizontalGroup("Stamina/Box/Row1")]
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Maximum stamina value")]
+        public float maxStamina      = 100f;
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Stamina restored per second when not draining")]
+        public float staminaRegenRate = 25f;
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Seconds after last drain before regen starts")]
+        public float staminaRegenDelay = 1.2f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per dash")]
+        public float dashStaminaCost  = 25f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina drained per second while sprinting")]
+        public float sprintStaminaDrain = 15f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per attack")]
+        public float attackStaminaCost = 20f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per blocked hit")]
+        public float blockStaminaCost  = 15f;
+
         // ── Validation ────────────────────────────────────────────────────
 
         private void OnValidate()
@@ -193,3 +227,5 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
     }
 }
+
+// NOTE: append vào cuối trước closing brace của class
