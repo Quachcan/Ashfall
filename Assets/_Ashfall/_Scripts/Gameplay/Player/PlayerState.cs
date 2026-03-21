@@ -7,6 +7,8 @@
     {
         Idle,
         Run,
+        CrouchIdle,
+        CrouchWalk,
         Jump,
         Fall,
         Dash,

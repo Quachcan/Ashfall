@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace _Ashfall._Scripts.Gameplay.Player
 {
@@ -7,63 +8,188 @@ namespace _Ashfall._Scripts.Gameplay.Player
     /// Create one asset per class (FighterStats, MageStats, etc.) and swap
     /// via the PlayerController Inspector — no prefab duplication needed.
     ///
-    /// Create menu: Ashfall/Player/PlayerStats
+    /// All values are live-editable during Play Mode.
     /// </summary>
-    
-    [CreateAssetMenu(menuName = "Ashfall/Player/PlayerStats", fileName = "PlayerStats_New", order = -1000)]
+    [CreateAssetMenu(menuName = "Ashfall/Player/PlayerStats", fileName = "PlayerStats_New")]
     public class PlayerStats : ScriptableObject
     {
-        [Header("Movement")]
-        [Tooltip("Top horizontal speed in units/s")]
-        public float moveSpeed = 6f;
-        
-        [Tooltip("How fast the player reaches top speed (higher = snappier")]
-        public float acceleration = 20f;
-        
-        [Tooltip("How fast the player decelerates when no input (higher = snappier stop")]
-        public float deceleration = 25f;
-        
-        [Header("Jump")]
+        // ── Movement ──────────────────────────────────────────────────────
+
+        [TitleGroup("Movement")]
+        [BoxGroup("Movement/Box")]
+        [InfoBox("moveSpeed = sprint cap. walkSpeed/runSpeed = Blend Tree thresholds.")]
+
+        [BoxGroup("Movement/Box")]
+        [HorizontalGroup("Movement/Box/Row1")]
+        [VerticalGroup("Movement/Box/Row1/Left"), LabelWidth(120)]
+        [Tooltip("Max horizontal speed — sprint cap (units/s)")]
+        public float moveSpeed          = 6f;
+
+        [VerticalGroup("Movement/Box/Row1/Left"), LabelWidth(120)]
+        [Tooltip("Speed threshold Walk → Run blend")]
+        public float walkSpeed          = 3f;
+
+        [VerticalGroup("Movement/Box/Row1/Left"), LabelWidth(120)]
+        [Tooltip("Speed threshold Run → Sprint blend")]
+        public float runSpeed           = 5f;
+
+        [VerticalGroup("Movement/Box/Row1/Left"), LabelWidth(120)]
+        [Tooltip("Max speed while crouching (units/s)")]
+        public float crouchSpeed        = 2f;
+
+        [VerticalGroup("Movement/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("How fast player reaches top speed")]
+        public float acceleration       = 20f;
+
+        [VerticalGroup("Movement/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("How fast player stops when no input")]
+        public float deceleration       = 25f;
+
+        [VerticalGroup("Movement/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Slower ramp-up from Run into Sprint")]
+        public float sprintAcceleration = 8f;
+
+        // ── Crouch ────────────────────────────────────────────────────────
+
+        [TitleGroup("Crouch")]
+        [BoxGroup("Crouch/Box")]
+        [HorizontalGroup("Crouch/Box/Row1")]
+        [VerticalGroup("Crouch/Box/Row1/Left"), LabelWidth(150)]
+        [Tooltip("Collider height when standing")]
+        public float standingColliderHeight = 2f;
+
+        [VerticalGroup("Crouch/Box/Row1/Left"), LabelWidth(150)]
+        [Tooltip("Collider height when crouching")]
+        public float crouchColliderHeight   = 1f;
+
+        [VerticalGroup("Crouch/Box/Row1/Right"), LabelWidth(150)]
+        [Tooltip("Collider center Y when standing")]
+        public float standingColliderCenter = 1f;
+
+        [VerticalGroup("Crouch/Box/Row1/Right"), LabelWidth(150)]
+        [Tooltip("Collider center Y when crouching")]
+        public float crouchColliderCenter   = 0.5f;
+
+        // ── Jump ──────────────────────────────────────────────────────────
+
+        [TitleGroup("Jump")]
+        [BoxGroup("Jump/Box")]
+        [HorizontalGroup("Jump/Box/Row1")]
+        [VerticalGroup("Jump/Box/Row1/Left"), LabelWidth(130)]
         [Tooltip("Upward velocity applied on jump")]
-        public float jumpForce = 14f;
-        
-        [Tooltip("How long after walking off a ledge the player can still jump (seconds)")]
-        public float coyoteTime      = 0.12f;
-        
-        [Tooltip("Max number of jump (1 = single, 2 = double jump")]
-        public int maxJumps = 2;
-        
-        [Tooltip("Multiplier applied to gravity when falling (makes fall feel heavier)")]
+        public float jumpForce             = 14f;
+
+        [VerticalGroup("Jump/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Max number of jumps (1 = single, 2 = double)")]
+        public int   maxJumps              = 2;
+
+        [VerticalGroup("Jump/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Time after leaving ground player can still jump")]
+        public float coyoteTime            = 0.12f;
+
+        [VerticalGroup("Jump/Box/Row1/Right"), LabelWidth(150)]
+        [Tooltip("Extra gravity when falling")]
         public float fallGravityMultiplier = 2.5f;
-        
-        [Tooltip("Multiplier applied when jump button is released early (shot hop")]
-        public float lowJumpMultiplier = 2f;
-        
-        [Header("Dash")]
-        [Tooltip("Speed of the dash in units/s")]
-        public float dashSpeed = 18f;
-        
-        [Tooltip("Duration of the dash in seconds")]
-        public float dashDuration = 0.18f;
-        
-        [Tooltip("Cooldown between dashes in seconds")]
-        public float dashCooldown = 0.6f;
-        
-        [Header("Ground Check")]
-        [Tooltip("LayerMask for ground detection")]
+
+        [VerticalGroup("Jump/Box/Row1/Right"), LabelWidth(150)]
+        [Tooltip("Extra gravity on early jump release (short hop)")]
+        public float lowJumpMultiplier     = 2f;
+
+        // ── Dash ──────────────────────────────────────────────────────────
+
+        [TitleGroup("Dash")]
+        [BoxGroup("Dash/Box")]
+        [HorizontalGroup("Dash/Box/Row1")]
+        [VerticalGroup("Dash/Box/Row1/Left"), LabelWidth(110)]
+        [Tooltip("Speed of the dash (units/s)")]
+        public float dashSpeed             = 18f;
+
+        [VerticalGroup("Dash/Box/Row1/Right"), LabelWidth(110)]
+        [Tooltip("Duration of the dash (seconds)")]
+        public float dashDuration          = 0.18f;
+
+        [VerticalGroup("Dash/Box/Row1/Right"), LabelWidth(110)]
+        [Tooltip("Cooldown between dashes (seconds)")]
+        public float dashCooldown          = 0.6f;
+
+        // ── Detection ─────────────────────────────────────────────────────
+
+        [TitleGroup("Detection")]
+        [BoxGroup("Detection/Ground", centerLabel: true, LabelText = "Ground Check")]
+        [BoxGroup("Detection/Ground"), LabelWidth(140)]
         public LayerMask groundLayer;
-        
-        [Tooltip("Offset from transform origin to the center of the ground-check sphere")]
-        public Vector3 groundCheckOffset = new Vector3(0f, -0.05f, 0f);
-        
-        [Tooltip("Radius of the ground-check sphere")]
-        public float groundCheckRadius = 0.25f;
-        
-        [Header("Wall check")]
-        [Tooltip("LayerMask for Wall detection")]
+
+        [BoxGroup("Detection/Ground"), LabelWidth(140)]
+        public Vector3 groundCheckOffset   = new Vector3(0f, -0.05f, 0f);
+
+        [BoxGroup("Detection/Ground"), LabelWidth(140), Range(0.05f, 1f)]
+        public float groundCheckRadius     = 0.25f;
+
+        [BoxGroup("Detection/Wall", centerLabel: true, LabelText = "Wall Check")]
+        [BoxGroup("Detection/Wall"), LabelWidth(140)]
         public LayerMask wallLayer;
 
-        [Tooltip("Horizontal check offset for wall check ray")]
-        public float wallCheckDistance = 0.4f;
+        [BoxGroup("Detection/Wall"), LabelWidth(140), Range(0.1f, 2f)]
+        public float wallCheckDistance     = 0.4f;
+
+        // ── Quick Presets ─────────────────────────────────────────────────
+
+        [TitleGroup("Quick Presets")]
+        [InfoBox("Apply preset values for quick tuning. Works in Play Mode too.")]
+        [HorizontalGroup("Quick Presets/Buttons")]
+
+        [Button("Responsive", ButtonSizes.Medium), GUIColor(0.4f, 0.8f, 0.4f)]
+        private void PresetResponsive()
+        {
+            acceleration = 30f; deceleration = 40f;
+            jumpForce    = 15f; coyoteTime   = 0.15f;
+            dashSpeed    = 20f; dashDuration = 0.15f;
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+
+        [HorizontalGroup("Quick Presets/Buttons")]
+        [Button("Balanced", ButtonSizes.Medium), GUIColor(0.4f, 0.6f, 1f)]
+        private void PresetBalanced()
+        {
+            acceleration = 20f; deceleration = 25f;
+            jumpForce    = 14f; coyoteTime   = 0.12f;
+            dashSpeed    = 18f; dashDuration = 0.18f;
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+
+        [HorizontalGroup("Quick Presets/Buttons")]
+        [Button("Heavy", ButtonSizes.Medium), GUIColor(1f, 0.6f, 0.3f)]
+        private void PresetHeavy()
+        {
+            acceleration          = 12f; deceleration = 15f;
+            jumpForce             = 12f; coyoteTime   = 0.08f;
+            dashSpeed             = 15f; dashDuration = 0.22f;
+            fallGravityMultiplier = 3.5f;
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+
+        // ── Validation ────────────────────────────────────────────────────
+
+        private void OnValidate()
+        {
+            moveSpeed    = Mathf.Max(0.1f,  moveSpeed);
+            walkSpeed    = Mathf.Clamp(walkSpeed, 0.1f, runSpeed - 0.1f);
+            runSpeed     = Mathf.Clamp(runSpeed,  walkSpeed + 0.1f, moveSpeed);
+            crouchSpeed  = Mathf.Clamp(crouchSpeed, 0.1f, walkSpeed);
+            acceleration = Mathf.Max(0.1f,  acceleration);
+            deceleration = Mathf.Max(0.1f,  deceleration);
+            jumpForce    = Mathf.Max(0f,    jumpForce);
+            maxJumps     = Mathf.Max(1,     maxJumps);
+            coyoteTime   = Mathf.Max(0f,    coyoteTime);
+            dashSpeed    = Mathf.Max(0.1f,  dashSpeed);
+            dashDuration = Mathf.Max(0.01f, dashDuration);
+            dashCooldown = Mathf.Max(0f,    dashCooldown);
+        }
     }
 }
