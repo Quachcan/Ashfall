@@ -15,10 +15,10 @@ namespace _Ashfall._Scripts.Core.Bootstrap
         static void InjectBootstrap()
         {
             // Already in Bootstrap — no need to inject
-            if (SceneManager.GetActiveScene().name == "Bootstrap") return;
+            // if (SceneManager.GetActiveScene().name == "Bootstrap") return;
 
             // Load Bootstrap first — it will chain-load Persistent
-            SceneManager.LoadScene("BootstrapScene", LoadSceneMode.Single);
+            // SceneManager.LoadScene("BoostrapScene", LoadSceneMode.Single);
         }
 #endif
     }
