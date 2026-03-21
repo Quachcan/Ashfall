@@ -2,7 +2,7 @@
 
 namespace _Ashfall._Scripts.Core.EventCore.EventClasses
 {
-    [CreateAssetMenu(menuName = "Core/Events/TransformEvent", fileName = "TransformEvent")]
+    [CreateAssetMenu(menuName = "Core/Event/EventClasses/TransformEvent", fileName = "TransformEvent")]
     public class TransformEvent : Event<Transform>
     {
         

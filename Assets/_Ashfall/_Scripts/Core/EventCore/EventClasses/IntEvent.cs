@@ -2,7 +2,7 @@
 
 namespace _Ashfall._Scripts.Core.EventCore.EventClasses
 {
-    [CreateAssetMenu(menuName = "Core/Events/Int Event", fileName = "IntEvent")]
+    [CreateAssetMenu(menuName = "Core/Event/EventClasses/Int Event", fileName = "IntEvent")]
     public class IntEvent : Event<int> 
     {
         

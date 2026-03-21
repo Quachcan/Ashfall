@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace _Ashfall._Scripts.Core.EventCore.EventClasses
 {
-    [CreateAssetMenu(menuName = "Core/Events/Void Event", fileName = "Void Event")]
+    [CreateAssetMenu(menuName = "Core/Event/EventClasses/Void Event", fileName = "Void Event")]
     public class VoidEvent : ScriptableObject
     {
         public event Action OnEventRaised;
