@@ -48,6 +48,13 @@ MonoBehaviour:
   blockDamageReduction: 1
   parryWindowTime: 0.3
   parryActiveDuration: 0.3
+  parryClips:
+  - {fileID: 7400000, guid: b771788c9a2767549969d65d2b13240d, type: 2}
+  - {fileID: 7400000, guid: f88bd43ddb0f023499bd4cc691ff7ae6, type: 2}
+  - {fileID: 7400000, guid: aba26e74a8db9c64d8709c563b9f3439, type: 2}
+  - {fileID: 7400000, guid: a138d129dc9c3d24c8e5cc6b39c7c4e5, type: 2}
+  - {fileID: 7400000, guid: 6b1b47b0c58890345b0dbf2bd95d685a, type: 2}
+  parryStateClip: {fileID: 7400000, guid: b771788c9a2767549969d65d2b13240d, type: 2}
   guardBreakDuration: 1.5
   maxStamina: 100
   staminaRegenRate: 20

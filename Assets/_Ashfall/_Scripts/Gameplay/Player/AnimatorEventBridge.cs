@@ -50,6 +50,20 @@ namespace _Ashfall._Scripts.Gameplay.Player
             // TODO: AudioManager.Instance.PlaySfx("footstep");
         }
 
+        // ── Block / Parry Events ─────────────────────────────────────────
+
+        /// <summary>
+        /// Fire at the active parry frame (optional — for counter-attack window).
+        /// Wire on Parry clip at ~40-50%.
+        /// </summary>
+        public void OnParryWindowActive() => _controller?.OnParryWindowActive();
+
+        /// <summary>
+        /// Fire at the last frame of the Parry clip — exits parry state.
+        /// Wire on Parry clip at ~95%.
+        /// </summary>
+        public void OnParryEnd() => _controller?.OnParryEnd();
+
         // ── Death / Respawn Events ────────────────────────────────────────
 
         /// <summary>Fire when death animation reaches the "settled" frame.</summary>
