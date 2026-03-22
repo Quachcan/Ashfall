@@ -37,6 +37,13 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 _controller.ChangeState(PlayerState.CrouchIdle);
                 return;
             }
+
+            if (_ctx.CanBlock & _ctx.Input.BlockPressed)
+            {
+                _ctx.Input.ConsumeBlock();
+                _controller.ChangeState(PlayerState.Block);
+                return;
+            }
             
             // Jump input
             if (_ctx.Input.JumpPressed)
@@ -47,7 +54,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             }
 
             // Dash input — only triggers on tap, not hold (handled in InputHandler)
-            if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown)
+            if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown && _ctx.Stamina.Has(_ctx.Stats.dashStaminaCost))
             {
                 _ctx.Input.ConsumeDash();
                 _controller.ChangeState(PlayerState.Dash);
@@ -102,6 +109,16 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             float input       = _ctx.Input.MoveX;
             bool  isSprinting = _ctx.Input.SprintHeld && Mathf.Abs(input) > 0.1f;
 
+            if (isSprinting)
+            {
+                bool hasStamina = _ctx.Stamina.DrainSprint();
+                if (!hasStamina)
+                {
+                    _ctx.Input.ConsumeSprint();
+                    isSprinting = false;
+                }
+            }
+            
             // Sprint uses moveSpeed as target, run uses runSpeed as target
             float topSpeed   = isSprinting ? _ctx.Stats.moveSpeed : _ctx.Stats.runSpeed;
             float targetVelX = input * topSpeed;

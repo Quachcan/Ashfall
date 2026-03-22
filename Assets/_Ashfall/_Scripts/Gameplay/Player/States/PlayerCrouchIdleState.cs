@@ -53,7 +53,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 return;
             }
             
-            if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown)
+            if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown &&   _ctx.Stamina.Has(_ctx.Stats.dashStaminaCost))
             {
                 _ctx.Input.ConsumeDash();
                 _controller.ChangeState(PlayerState.Dash);

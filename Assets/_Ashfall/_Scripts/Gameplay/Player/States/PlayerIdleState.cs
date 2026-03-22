@@ -35,6 +35,13 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 _controller.ChangeState(PlayerState.CrouchIdle);
                 return;
             }
+
+            if (_ctx.CanBlock & _ctx.Input.BlockPressed)
+            {
+                _ctx.Input.ConsumeBlock();
+                _controller.ChangeState(PlayerState.Block);
+                return;
+            }
             
             // Jump input
             if (_ctx.Input.JumpPressed)
@@ -45,7 +52,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             }
 
             // Dash input
-            if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown)
+            if (_ctx.Input.DashPressed && !_ctx.IsDashOnCooldown && _ctx.Stamina.Has(_ctx.Stats.dashStaminaCost))
             {
                 _ctx.Input.ConsumeDash();
                 _controller.ChangeState(PlayerState.Dash);

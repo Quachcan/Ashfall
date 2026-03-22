@@ -174,6 +174,109 @@ namespace _Ashfall._Scripts.Gameplay.Player
 #endif
         }
 
+        // ── Attack / Combo ────────────────────────────────────────────────
+
+        [TitleGroup("Attack")]
+        [BoxGroup("Attack/Box")]
+        [HorizontalGroup("Attack/Box/Row1")]
+
+        [VerticalGroup("Attack/Box/Row1/Left"), LabelWidth(140)]
+        [Tooltip("Time window after each hit to queue the next attack (seconds)")]
+        public float comboWindowTime   = 0.8f;
+
+        [VerticalGroup("Attack/Box/Row1/Left"), LabelWidth(140)]
+        [Tooltip("Duration of each attack hit (fallback if no Animator event)")]
+        public float attackDuration    = 0.4f;
+
+        [VerticalGroup("Attack/Box/Row1/Right"), LabelWidth(140)]
+        [Tooltip("How much to slow horizontal movement during an attack [0=stop, 1=full speed]")]
+        [Range(0f, 1f)]
+        public float attackMoveScale   = 0.3f;
+
+        [TitleGroup("Attack")]
+        [BoxGroup("Attack/Box")]
+        [HorizontalGroup("Attack/Box/Row1")]
+
+        [VerticalGroup("Attack/Box/Row1/Left"), LabelWidth(140)]
+        [Tooltip("Total hits in the combo — must match number of Attack states in Animator")]
+        public int comboLength     = 3;
+
+        /// <summary>Combo length exposed as property for consistency.</summary>
+        public int ComboLength => comboLength;
+        
+        // ── Block / Parry ─────────────────────────────────────────────────
+
+        [TitleGroup("Block & Parry")]
+        [BoxGroup("Block & Parry/Box")]
+        [HorizontalGroup("Block & Parry/Box/Row1")]
+        [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
+        [Tooltip("Can this class block and parry?  (Fighter only for now")]
+        public bool canBlock = false;
+        
+        [VerticalGroup("Block & Parry/Box/Row1/Left")]
+        [ShowIf("canBlock")]
+        [Tooltip("How muc damage is reduced while blocking [0-1]")]
+        [Range(0f, 1f)]
+        public float blockDamageReduction = 0.7f;
+
+        [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
+        [Tooltip("Hold duration threshold - under this = parry, over = block (second)")]
+        public float parryWindowTime = 0.3f;
+        
+        [VerticalGroup("Block & Parry/Box/Row1/Right"), LabelWidth(150)]
+        [Tooltip("How long the parry active window last (second)")]
+        public float parryActiveDuration = 0.3f;
+        
+        [TitleGroup("Block & Parry")]
+        [BoxGroup("Block & Parry/ParryClips")]
+        [InfoBox("Drag parry clips here. One is picked randomly each parry.")]
+        [ShowIf("canBlock")]
+        [Tooltip("Parry animation clips — one picked randomly per parry")]
+        public AnimationClip[] parryClips;
+        
+        [BoxGroup("Block & Parry/ParryClips")]
+        [ShowIf("canBlock")]
+        [Tooltip("The placeholder clip assigned to the Parry state in Animator — used as override key")]
+        public AnimationClip parryStateClip;
+        
+        [VerticalGroup("Block & Parry/Box/Row1/Right"), LabelWidth(150)]
+        [Tooltip("Duration of guard break stagger (seconds)")]
+        public float guardBreakDuration = 1.5f;
+
+        // ── Stamina ───────────────────────────────────────────────────────
+
+        [TitleGroup("Stamina")]
+        [BoxGroup("Stamina/Box")]
+        [HorizontalGroup("Stamina/Box/Row1")]
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Maximum stamina value")]
+        public float maxStamina      = 100f;
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Stamina restored per second when not draining")]
+        public float staminaRegenRate = 25f;
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Seconds after last drain before regen starts")]
+        public float staminaRegenDelay = 1.2f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per dash")]
+        public float dashStaminaCost  = 25f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina drained per second while sprinting")]
+        public float sprintStaminaDrain = 15f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per attack")]
+        public float attackStaminaCost = 20f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per blocked hit")]
+        public float blockStaminaCost  = 15f;
+
         // ── Validation ────────────────────────────────────────────────────
 
         private void OnValidate()
@@ -193,3 +296,5 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
     }
 }
+
+// NOTE: append vào cuối trước closing brace của class

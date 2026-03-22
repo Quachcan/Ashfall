@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using _Ashfall._Scripts.Core.StateMachineCore;
-using _Ashfall._Scripts.Gameplay.Player.States;
 using UnityEngine;
+using _Ashfall._Scripts.Gameplay.Player.States;
+using _Ashfall._Scripts.Core.StateMachineCore;
 
 namespace _Ashfall._Scripts.Gameplay.Player
 {
@@ -13,6 +13,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(PlayerInputHandler))]
+    [RequireComponent(typeof(StaminaSystem))]
     public class PlayerController : MonoBehaviour, IDebugStateProvider
     {
         // ── Inspector ─────────────────────────────────────────────────────
@@ -27,10 +28,12 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         // ── Components ────────────────────────────────────────────────────
 
-        private Rigidbody          _rb;
-        private CapsuleCollider    _collider;
-        private PlayerInputHandler _input;
-        private Animator           _animator;
+        private Rigidbody                  _rb;
+        private CapsuleCollider            _collider;
+        private PlayerInputHandler         _input;
+        private Animator                   _animator;
+        private StaminaSystem              _stamina;
+        private AnimatorOverrideController _overrideController;
 
         // ── FSM ───────────────────────────────────────────────────────────
 
@@ -45,7 +48,10 @@ namespace _Ashfall._Scripts.Gameplay.Player
             _rb       = GetComponent<Rigidbody>();
             _collider = GetComponent<CapsuleCollider>();
             _input    = GetComponent<PlayerInputHandler>();
-            _animator = GetComponentInChildren<Animator>(); // Animator is on the Model child
+            _stamina  = GetComponent<StaminaSystem>();
+
+            // Animator lives on the Model child — never on the root
+            _animator = GetComponentInChildren<Animator>();
 
             if (!stats)
             {
@@ -59,8 +65,23 @@ namespace _Ashfall._Scripts.Gameplay.Player
                             | RigidbodyConstraints.FreezeRotationY
                             | RigidbodyConstraints.FreezeRotationZ;
 
+            // Initialize stamina with stats config
+            _stamina.Initialize(stats);
+
+            // Set class capability flags
+            _ctx.CanBlock = stats.canBlock;
+
+            // Setup AnimatorOverrideController for random parry clips
+            if (_animator && _animator.runtimeAnimatorController)
+            {
+                _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
+                _animator.runtimeAnimatorController = _overrideController;
+            }
+
+
+
             // Build shared context
-            _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider);
+            _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina);
             _ctx.CoyoteTimeDuration = stats.coyoteTime;
 
             // Run checks before FSM init to prevent false Fall on frame 0
@@ -95,14 +116,17 @@ namespace _Ashfall._Scripts.Gameplay.Player
         {
             _states = new Dictionary<PlayerState, IState>
             {
-                { PlayerState.Idle,        new PlayerIdleState(this, _ctx)        },
-                { PlayerState.Run,         new PlayerRunState(this, _ctx)         },
-                { PlayerState.Jump,        new PlayerJumpState(this, _ctx)        },
-                { PlayerState.Fall,        new PlayerFallState(this, _ctx)        },
-                { PlayerState.Dash,        new PlayerDashState(this, _ctx)        },
-                { PlayerState.Attack,      new PlayerAttackState(this, _ctx)      },
-                { PlayerState.CrouchIdle,  new PlayerCrouchIdleState(this, _ctx)  },
+                { PlayerState.Idle,       new PlayerIdleState(this, _ctx)       },
+                { PlayerState.Run,        new PlayerRunState(this, _ctx)        },
+                { PlayerState.Jump,       new PlayerJumpState(this, _ctx)       },
+                { PlayerState.Fall,       new PlayerFallState(this, _ctx)       },
+                { PlayerState.Dash,       new PlayerDashState(this, _ctx)       },
+                { PlayerState.Attack,     new PlayerAttackState(this, _ctx)     },
+                { PlayerState.CrouchIdle, new PlayerCrouchIdleState(this, _ctx) },
                 { PlayerState.CrouchWalk,  new PlayerCrouchWalkState(this, _ctx)  },
+                { PlayerState.Block,       new PlayerBlockState(this, _ctx)       },
+                { PlayerState.Parry,       new PlayerParryState(this, _ctx)       },
+                { PlayerState.GuardBreak,  new PlayerGuardBreakState(this, _ctx)  },
                 { PlayerState.Dead,        new PlayerDeadState(this, _ctx)        },
             };
 
@@ -128,10 +152,6 @@ namespace _Ashfall._Scripts.Gameplay.Player
             }
         }
 
-        /// <summary>
-        /// Resize CapsuleCollider height and center for crouch/stand.
-        /// Called by crouch states on Enter/Exit.
-        /// </summary>
         public void SetColliderCrouch(bool crouching)
         {
             if (!_collider) return;
@@ -143,6 +163,8 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
 
         public PlayerState CurrentState => _fsm.CurrentState;
+
+
 
         // ── Ground / Wall Detection ───────────────────────────────────────
 
@@ -207,12 +229,9 @@ namespace _Ashfall._Scripts.Gameplay.Player
             float targetSpeed = Mathf.Abs(_ctx.AnimMoveSpeed);
             float dampTime    = targetSpeed < 0.01f ? 0f : 0.1f;
 
-            _animator.SetFloat(AnimHash.MoveSpeed,   targetSpeed, dampTime, Time.deltaTime);
-            _animator.SetBool(AnimHash.IsGrounded,   _ctx.IsGrounded);
-            // Read IsCrouching from Input directly — _ctx.IsCrouching is set by SetColliderCrouch()
-            // which only fires on state Enter/Exit, causing 1-frame delay.
-            // Input.IsCrouching updates immediately on button press.
-            _animator.SetBool(AnimHash.IsCrouching,  _ctx.Input.IsCrouching);
+            _animator.SetFloat(AnimHash.MoveSpeed,  targetSpeed, dampTime, Time.deltaTime);
+            _animator.SetBool(AnimHash.IsGrounded,  _ctx.IsGrounded);
+            _animator.SetBool(AnimHash.IsCrouching, _ctx.Input.IsCrouching);
         }
 
         // ── Flip ──────────────────────────────────────────────────────────
@@ -227,6 +246,60 @@ namespace _Ashfall._Scripts.Gameplay.Player
             Vector3 scale = transform.localScale;
             scale.x = Mathf.Abs(scale.x) * newDir;
             transform.localScale = scale;
+        }
+
+        // ── Animator Event Receivers ─────────────────────────────────────
+        // These are called by Unity Animator events on the Model child.
+        // They forward to the current AttackState if active.
+
+        /// <summary>Called by Animator event at hit impact frame.</summary>
+        public void OnAttackHit()
+        {
+            if (_fsm.CurrentState == PlayerState.Attack &&
+                _states.TryGetValue(PlayerState.Attack, out var state))
+                ((PlayerAttackState)state).OnAttackHit();
+        }
+
+        /// <summary>Called by Animator event at end of each attack clip.</summary>
+        public void OnAttackEnd()
+        {
+            if (_fsm.CurrentState == PlayerState.Attack &&
+                _states.TryGetValue(PlayerState.Attack, out var state))
+                ((PlayerAttackState)state).OnAttackEnd();
+        }
+
+        /// <summary>
+        /// Swaps the Parry state clip with a randomly chosen one from parryClips.
+        /// Called by PlayerParryState before CrossFade.
+        /// </summary>
+        public void SwapParryClip()
+        {
+            var clips     = stats.parryClips;
+            var stateClip = stats.parryStateClip;
+
+            if (clips == null || clips.Length == 0
+                || stateClip == null || _overrideController == null) return;
+
+            var randomClip = clips[Random.Range(0, clips.Length)];
+            if (randomClip != null)
+                _overrideController[stateClip.name] = randomClip;
+        }
+
+        /// <summary>
+        /// Called by Animator event at the active parry frame.
+        /// Notifies ParryState that the deflection window is now open.
+        /// </summary>
+        public void OnParryWindowActive()
+        {
+            if (_fsm.CurrentState == PlayerState.Parry &&
+                _states.TryGetValue(PlayerState.Parry, out var state))
+                ((PlayerParryState)state).OnParryWindowOpen();
+        }
+
+        /// <summary>Called by Animator event when death animation settles.</summary>
+        public void OnDeathSettled()
+        {
+            // TODO: trigger respawn sequence via Grace Point system
         }
 
         // ── Callbacks ─────────────────────────────────────────────────────
@@ -249,14 +322,18 @@ namespace _Ashfall._Scripts.Gameplay.Player
             if (showGroundGizmo)
             {
                 Gizmos.color = _ctx is { IsGrounded: true } ? Color.green : Color.red;
-                Gizmos.DrawWireSphere(transform.position + stats.groundCheckOffset, stats.groundCheckRadius);
+                Gizmos.DrawWireSphere(
+                    transform.position + stats.groundCheckOffset,
+                    stats.groundCheckRadius);
             }
 
             if (showWallGizmo)
             {
                 Gizmos.color = Color.blue;
                 float dir = _ctx?.FacingDirection ?? 1f;
-                Gizmos.DrawRay(transform.position, new Vector3(dir * stats.wallCheckDistance, 0f, 0f));
+                Gizmos.DrawRay(
+                    transform.position,
+                    new Vector3(dir * stats.wallCheckDistance, 0f, 0f));
             }
         }
     }
