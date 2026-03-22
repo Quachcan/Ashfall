@@ -15,9 +15,14 @@ MonoBehaviour:
   moveSpeed: 10
   walkSpeed: 2
   runSpeed: 6.5
+  crouchSpeed: 2
   acceleration: 20
   deceleration: 25
   sprintAcceleration: 20
+  standingColliderHeight: 2
+  crouchColliderHeight: 1
+  standingColliderCenter: 1
+  crouchColliderCenter: 0.5
   jumpForce: 6.5
   maxJumps: 1
   coyoteTime: 0.12
@@ -35,3 +40,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   wallCheckDistance: 0.8
+  comboWindowTime: 1
+  attackDuration: 0.5
+  attackMoveScale: 0
+  comboLength: 4
+  canBlock: 1
+  blockDamageReduction: 1
+  parryWindowTime: 0.3
+  parryActiveDuration: 0.3
+  guardBreakDuration: 1.5
+  maxStamina: 100
+  staminaRegenRate: 20
+  staminaRegenDelay: 0.5
+  dashStaminaCost: 25
+  sprintStaminaDrain: 15
+  attackStaminaCost: 10
+  blockStaminaCost: 15

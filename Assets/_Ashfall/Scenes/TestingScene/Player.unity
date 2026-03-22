@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 333552037}
   serializedVersion: 2
   m_LocalRotation: {x: 0.10520648, y: 0.00000000360364, z: -3.8124207e-10, w: 0.9944504}
-  m_LocalPosition: {x: 1.5, y: 5.86, z: -10}
+  m_LocalPosition: {x: 1, y: 5.86, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -236,7 +236,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -427,7 +427,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 2, z: 5}
+  m_LocalScale: {x: 200, y: 2, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -447,6 +447,7 @@ GameObject:
   - component: {fileID: 714634105}
   - component: {fileID: 714634102}
   - component: {fileID: 714634100}
+  - component: {fileID: 714634107}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -610,6 +611,18 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &714634107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714634098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15357c8b13ad4b0391b48b56dcddd7cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Player.StaminaSystem
 --- !u!1 &757892342
 GameObject:
   m_ObjectHideFlags: 0
@@ -701,13 +714,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 757892342}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.41582566, y: -0.58602655, z: -0.075466424, w: 0.69135135}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 29.112, y: -92.143, z: -42.631}
 --- !u!114 &757892345
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -773,7 +786,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 1.5, y: 3, z: -10}
+  FollowOffset: {x: 1, y: 3, z: -10}
 --- !u!114 &1514974195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -826,7 +839,7 @@ Transform:
   m_GameObject: {fileID: 1514974192}
   serializedVersion: 2
   m_LocalRotation: {x: 0.10520649, y: 0.0000000036036405, z: -3.8124223e-10, w: 0.9944504}
-  m_LocalPosition: {x: 1.5, y: 5.86, z: -10}
+  m_LocalPosition: {x: 1, y: 5.86, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5958,6 +5971,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3584479406788221313}
   - component: {fileID: 4248426806654321468}
+  - component: {fileID: 4248426806654321469}
   m_Layer: 7
   m_Name: M_Fighter
   m_TagString: Untagged
@@ -5987,6 +6001,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4248426806654321469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4248426806654321467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8038126defcd40869215ce6cc1b9ac83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Player.AnimatorEventBridge
 --- !u!4 &4281928117331714887
 Transform:
   m_ObjectHideFlags: 0

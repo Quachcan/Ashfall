@@ -25,6 +25,8 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         /// <summary>True while the player is in a crouch state.</summary>
         public bool IsCrouching { get; set; }
+        
+        public bool CanBlock { get; set; }
 
         /// <summary>True when the player is touching the ground this frame.</summary>
         public bool IsGrounded { get; set; }

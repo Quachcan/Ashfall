@@ -7,12 +7,15 @@
     {
         Idle,
         Run,
-        CrouchIdle,
-        CrouchWalk,
         Jump,
         Fall,
         Dash,
         Attack,
+        CrouchIdle,
+        CrouchWalk,
+        Block,
+        Parry,
+        GuardBreak,
         Dead
     }
 }

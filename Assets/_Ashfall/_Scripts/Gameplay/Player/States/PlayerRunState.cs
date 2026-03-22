@@ -37,6 +37,13 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 _controller.ChangeState(PlayerState.CrouchIdle);
                 return;
             }
+
+            if (_ctx.CanBlock & _ctx.Input.BlockPressed)
+            {
+                _ctx.Input.ConsumeBlock();
+                _controller.ChangeState(PlayerState.Block);
+                return;
+            }
             
             // Jump input
             if (_ctx.Input.JumpPressed)
