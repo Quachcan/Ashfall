@@ -65,12 +65,6 @@ namespace _Ashfall._Scripts.Gameplay.Player
                             | RigidbodyConstraints.FreezeRotationY
                             | RigidbodyConstraints.FreezeRotationZ;
 
-            // Initialize stamina with stats config
-            _stamina.Initialize(stats);
-
-            // Set class capability flags
-            _ctx.CanBlock = stats.canBlock;
-
             // Setup AnimatorOverrideController for random parry clips
             if (_animator && _animator.runtimeAnimatorController)
             {
@@ -78,11 +72,15 @@ namespace _Ashfall._Scripts.Gameplay.Player
                 _animator.runtimeAnimatorController = _overrideController;
             }
 
+            // Initialize stamina with stats config
+            _stamina.Initialize(stats);
 
-
-            // Build shared context
+            // Build shared context — must be created before anything reads _ctx
             _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina);
             _ctx.CoyoteTimeDuration = stats.coyoteTime;
+
+            // Set class capability flags — after _ctx is created
+            _ctx.CanBlock = stats.canBlock;
 
             // Run checks before FSM init to prevent false Fall on frame 0
             CheckGrounded();
@@ -226,8 +224,10 @@ namespace _Ashfall._Scripts.Gameplay.Player
             if (!_animator || !_animator.isActiveAndEnabled || _animator.runtimeAnimatorController == null)
                 return;
 
-            float targetSpeed = Mathf.Abs(_ctx.AnimMoveSpeed);
-            float dampTime    = targetSpeed < 0.01f ? 0f : 0.1f;
+            bool isBlocking = _fsm.CurrentState == PlayerState.Block;
+            float targetSpeed = isBlocking ? _ctx.AnimMoveSpeed : Mathf.Abs(_ctx.AnimMoveSpeed);
+            float dampTime    = isBlocking ? 0.15f :
+                                Mathf.Abs(targetSpeed) < 0.01f ? 0f : 0.1f;
 
             _animator.SetFloat(AnimHash.MoveSpeed,  targetSpeed, dampTime, Time.deltaTime);
             _animator.SetBool(AnimHash.IsGrounded,  _ctx.IsGrounded);
@@ -269,6 +269,20 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
 
         /// <summary>
+        /// Gets the ParryState instance — used by BlockState to pass attacker reference.
+        /// </summary>
+        public bool TryGetParryState(out PlayerParryState parryState)
+        {
+            if (_states.TryGetValue(PlayerState.Parry, out var state) && state is PlayerParryState ps)
+            {
+                parryState = ps;
+                return true;
+            }
+            parryState = null;
+            return false;
+        }
+
+        /// <summary>
         /// Swaps the Parry state clip with a randomly chosen one from parryClips.
         /// Called by PlayerParryState before CrossFade.
         /// </summary>
@@ -294,6 +308,14 @@ namespace _Ashfall._Scripts.Gameplay.Player
             if (_fsm.CurrentState == PlayerState.Parry &&
                 _states.TryGetValue(PlayerState.Parry, out var state))
                 ((PlayerParryState)state).OnParryWindowOpen();
+        }
+
+        /// <summary>Called by Animator event when parry animation ends.</summary>
+        public void OnParryEnd()
+        {
+            if (_fsm.CurrentState == PlayerState.Parry &&
+                _states.TryGetValue(PlayerState.Parry, out var state))
+                ((PlayerParryState)state).OnParryEnd();
         }
 
         /// <summary>Called by Animator event when death animation settles.</summary>

@@ -4,28 +4,27 @@ using UnityEngine;
 namespace _Ashfall._Scripts.Gameplay.Player.States
 {
     /// <summary>
-    /// Player performs a parry — randomly picks one of the parry clips,
-    /// then opens an active window where any incoming hit is perfectly deflected.
-    ///
-    /// Triggered by: tapping Block (press + release within parryWindowTime).
+    /// Plays the parry animation after a perfect block is detected in BlockState.
+    /// This state is purely visual — the parry detection logic lives in BlockState.
     ///
     /// Flow:
-    ///   Enter → swap random clip → CrossFade to Parry state
-    ///   Animator Event OnParryWindowOpen → _windowOpen = true
-    ///   If hit arrives while _windowOpen → stagger enemy, no damage
-    ///   parryActiveDuration expires → exit to Idle
+    ///   BlockState detects hit during parry window
+    ///   → ChangeState(Parry)
+    ///   → SwapParryClip (random) + CrossFade
+    ///   → Animator Event OnParryWindowOpen (optional — for future counter-attack)
+    ///   → Animation ends → return to Idle
     /// </summary>
     public class PlayerParryState : IState
     {
         private readonly PlayerController _controller;
         private readonly PlayerContext    _ctx;
 
-        // Use centralized hash from AnimHash
         private static readonly int ParryStateHash = AnimHash.ParryState;
 
-        private float _parryTimer;
-        private bool  _parrySuccess;
-        private bool  _windowOpen;
+        private GameObject _attacker;
+        private bool       _windowOpen;
+        private float      _exitTimer;
+        private const float ExitNormalizedTime = 0.85f; // exit at 85% of animation
 
         public PlayerParryState(PlayerController controller, PlayerContext ctx)
         {
@@ -35,60 +34,58 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void Enter()
         {
-            _parryTimer   = _ctx.Stats.parryActiveDuration;
-            _parrySuccess = false;
-            _windowOpen   = false;
-
+            _windowOpen        = false;
             _ctx.AnimMoveSpeed = 0f;
 
-            // Swap to a random parry clip then CrossFade
+            // Stagger the attacker immediately
+            if (_attacker != null)
+            {
+                // TODO: _attacker.GetComponent<EnemyBase>()?.TriggerStagger();
+                _attacker = null;
+            }
+
+            // Swap to random parry clip then play
             _controller.SwapParryClip();
             _ctx.Animator?.CrossFade(ParryStateHash, 0.05f, 0);
 
-            // TODO: _ctx.Hurtbox.SetBlocking(true);
+            // TODO: raise EventHub — parry VFX, SFX, optional slow-motion
+            // _eventHub.playerEvents.onPlayerParried.Raise();
         }
 
-        public void Exit()
-        {
-            // TODO: _ctx.Hurtbox.SetBlocking(false);
-        }
+        public void Exit() { }
 
         public void Tick()
         {
-            _parryTimer -= Time.deltaTime;
+            if (_ctx.Animator == null) return;
 
-            if (_parryTimer <= 0f)
-                _controller.ChangeState(PlayerState.Idle); // window expired — whiff
+            // Check if parry animation is near completion
+            // More reliable than Animation Events on SO clips
+            var stateInfo = _ctx.Animator.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.shortNameHash == AnimHash.ParryState
+                && stateInfo.normalizedTime >= ExitNormalizedTime)
+            {
+                _controller.ChangeState(PlayerState.Idle);
+            }
         }
 
         public void FixedTick() { }
 
-        // ── Animator Event Callbacks ──────────────────────────────────────
+        // ── External API ──────────────────────────────────────────────────
+
+        /// <summary>Set attacker reference before entering — called by BlockState.</summary>
+        public void SetAttacker(GameObject attacker) => _attacker = attacker;
 
         /// <summary>
-        /// Called by AnimatorEventBridge when animation reaches the active parry frame.
-        /// Opens the deflection window — hits arriving after this are perfect parries.
+        /// Called by AnimatorEventBridge at the active parry frame.
+        /// Opens counter-attack window — future feature.
         /// </summary>
         public void OnParryWindowOpen() => _windowOpen = true;
 
-        // ── Hit Detection ─────────────────────────────────────────────────
+        // ── Animator Event ────────────────────────────────────────────────
 
-        /// <summary>
-        /// Called by HurtboxController when a hit arrives.
-        /// Only deflects if active window is open.
-        /// </summary>
-        public void OnHitReceived(GameObject attacker)
+        /// <summary>Called by AnimatorEventBridge when parry animation ends.</summary>
+        public void OnParryEnd()
         {
-            if (!_windowOpen) return; // hit before active frame — not a parry
-
-            _parrySuccess = true;
-
-            // TODO: stagger enemy
-            // attacker.GetComponent<EnemyBase>()?.TriggerStagger();
-
-            // TODO: raise EventHub event for parry VFX/SFX
-            // _eventHub.playerEvents.onPlayerParried.Raise();
-
             _controller.ChangeState(PlayerState.Idle);
         }
     }

@@ -105,7 +105,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
             _dashAction   = _playerInput.actions["Dash"];
             _attackAction = _playerInput.actions["Attack"];
             _crouchAction = _playerInput.actions["Crouch"];
-            _blockAction  = _playerInput.actions["Block"];
+            _blockAction  = _playerInput.actions["Defense"];
         }
 
         private void OnEnable()
