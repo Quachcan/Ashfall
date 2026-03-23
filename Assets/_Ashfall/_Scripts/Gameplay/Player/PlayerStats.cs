@@ -22,6 +22,9 @@ namespace _Ashfall._Scripts.Gameplay.Player
         [BoxGroup("Movement/Box")]
         [HorizontalGroup("Movement/Box/Row1")]
         [VerticalGroup("Movement/Box/Row1/Left"), LabelWidth(120)]
+        [ShowIf("canBlock")]
+        [ShowIf("canBlock")]
+        [ShowIf("canBlock")]
         [Tooltip("Max horizontal speed — sprint cap (units/s)")]
         public float moveSpeed          = 6f;
 
@@ -173,6 +176,14 @@ namespace _Ashfall._Scripts.Gameplay.Player
             UnityEditor.EditorUtility.SetDirty(this);
 #endif
         }
+        
+        // ── Health ───────────────────────────────────────────────────────
+ 
+        [TitleGroup("Health")]
+        [BoxGroup("Health/Box")]
+        [LabelWidth(100)]
+        [Tooltip("Maximum HP")]
+        public float maxHp = 100f;
 
         // ── Attack / Combo ────────────────────────────────────────────────
 
@@ -203,45 +214,46 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         /// <summary>Combo length exposed as property for consistency.</summary>
         public int ComboLength => comboLength;
-        
+
         // ── Block / Parry ─────────────────────────────────────────────────
 
         [TitleGroup("Block & Parry")]
         [BoxGroup("Block & Parry/Box")]
         [HorizontalGroup("Block & Parry/Box/Row1")]
+
         [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
-        [Tooltip("Can this class block and parry?  (Fighter only for now")]
-        public bool canBlock = false;
-        
-        [VerticalGroup("Block & Parry/Box/Row1/Left")]
+        [Tooltip("Can this class block and parry? (Fighter only for now)")]
+        public bool  canBlock             = false;
+
+        [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
         [ShowIf("canBlock")]
-        [Tooltip("How muc damage is reduced while blocking [0-1]")]
+        [Tooltip("How much damage is reduced while blocking [0-1]")]
         [Range(0f, 1f)]
         public float blockDamageReduction = 0.7f;
 
         [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
-        [Tooltip("Hold duration threshold - under this = parry, over = block (second)")]
-        public float parryWindowTime = 0.3f;
-        
+        [Tooltip("Hold duration threshold — under this = parry, over = block (seconds)")]
+        public float parryWindowTime      = 0.3f;
+
         [VerticalGroup("Block & Parry/Box/Row1/Right"), LabelWidth(150)]
-        [Tooltip("How long the parry active window last (second)")]
-        public float parryActiveDuration = 0.3f;
-        
+        [Tooltip("How long the parry active window lasts (seconds)")]
+        public float parryActiveDuration  = 0.3f;
+
         [TitleGroup("Block & Parry")]
         [BoxGroup("Block & Parry/ParryClips")]
         [InfoBox("Drag parry clips here. One is picked randomly each parry.")]
         [ShowIf("canBlock")]
         [Tooltip("Parry animation clips — one picked randomly per parry")]
         public AnimationClip[] parryClips;
-        
+
         [BoxGroup("Block & Parry/ParryClips")]
         [ShowIf("canBlock")]
         [Tooltip("The placeholder clip assigned to the Parry state in Animator — used as override key")]
         public AnimationClip parryStateClip;
-        
+
         [VerticalGroup("Block & Parry/Box/Row1/Right"), LabelWidth(150)]
         [Tooltip("Duration of guard break stagger (seconds)")]
-        public float guardBreakDuration = 1.5f;
+        public float guardBreakDuration   = 1.5f;
 
         // ── Stamina ───────────────────────────────────────────────────────
 

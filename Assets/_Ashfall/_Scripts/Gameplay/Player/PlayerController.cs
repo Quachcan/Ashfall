@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using _Ashfall._Scripts.Gameplay.Combat;
 using _Ashfall._Scripts.Gameplay.Player.States;
 using _Ashfall._Scripts.Core.StateMachineCore;
 
@@ -13,7 +14,6 @@ namespace _Ashfall._Scripts.Gameplay.Player
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(PlayerInputHandler))]
-    [RequireComponent(typeof(StaminaSystem))]
     public class PlayerController : MonoBehaviour, IDebugStateProvider
     {
         // ── Inspector ─────────────────────────────────────────────────────
@@ -32,8 +32,11 @@ namespace _Ashfall._Scripts.Gameplay.Player
         private CapsuleCollider            _collider;
         private PlayerInputHandler         _input;
         private Animator                   _animator;
-        private StaminaSystem              _stamina;
         private AnimatorOverrideController _overrideController;
+
+        // Pure C# systems — ticked manually, no MonoBehaviour Update overhead
+        private StaminaSystem _stamina;
+        private HealthSystem  _health;
 
         // ── FSM ───────────────────────────────────────────────────────────
 
@@ -48,7 +51,6 @@ namespace _Ashfall._Scripts.Gameplay.Player
             _rb       = GetComponent<Rigidbody>();
             _collider = GetComponent<CapsuleCollider>();
             _input    = GetComponent<PlayerInputHandler>();
-            _stamina  = GetComponent<StaminaSystem>();
 
             // Animator lives on the Model child — never on the root
             _animator = GetComponentInChildren<Animator>();
@@ -72,11 +74,15 @@ namespace _Ashfall._Scripts.Gameplay.Player
                 _animator.runtimeAnimatorController = _overrideController;
             }
 
-            // Initialize stamina with stats config
-            _stamina.Initialize(stats);
+            // Create pure C# systems — no MonoBehaviour, ticked manually
+            _stamina = new StaminaSystem(stats);
+            _health  = new HealthSystem(stats.maxHp);
+
+            // Subscribe health events
+            _health.OnDeath += OnPlayerDeath;
 
             // Build shared context — must be created before anything reads _ctx
-            _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina);
+            _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina, _health);
             _ctx.CoyoteTimeDuration = stats.coyoteTime;
 
             // Set class capability flags — after _ctx is created
@@ -94,6 +100,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         private void Update()
         {
             if (_fsm == null) return;
+            _stamina.Tick(Time.deltaTime);   // tick pure C# systems
             UpdateDashCooldown();
             _fsm.Tick();
             UpdateAnimator();
@@ -224,12 +231,17 @@ namespace _Ashfall._Scripts.Gameplay.Player
             if (!_animator || !_animator.isActiveAndEnabled || _animator.runtimeAnimatorController == null)
                 return;
 
-            bool isBlocking = _fsm.CurrentState == PlayerState.Block;
-            float targetSpeed = isBlocking ? _ctx.AnimMoveSpeed : Mathf.Abs(_ctx.AnimMoveSpeed);
-            float dampTime    = isBlocking ? 0.15f :
-                                Mathf.Abs(targetSpeed) < 0.01f ? 0f : 0.1f;
+            // While blocking, preserve sign for walk back (-1) vs walk forward (1)
+            // Otherwise use absolute value — locomotion blend tree is 0 to 3
+            bool  isBlocking = _fsm.CurrentState == PlayerState.Block;
+            float speed      = isBlocking ? _ctx.AnimMoveSpeed : Mathf.Abs(_ctx.AnimMoveSpeed);
 
-            _animator.SetFloat(AnimHash.MoveSpeed,  targetSpeed, dampTime, Time.deltaTime);
+            // Block uses longer damp time for smoother direction change feel
+            // Normal locomotion snaps to 0 immediately, ramps up smoothly
+            float dampTime   = isBlocking        ? 0.15f :
+                               Mathf.Abs(speed) < 0.01f ? 0f : 0.1f;
+
+            _animator.SetFloat(AnimHash.MoveSpeed,  speed, dampTime, Time.deltaTime);
             _animator.SetBool(AnimHash.IsGrounded,  _ctx.IsGrounded);
             _animator.SetBool(AnimHash.IsCrouching, _ctx.Input.IsCrouching);
         }
@@ -331,9 +343,38 @@ namespace _Ashfall._Scripts.Gameplay.Player
             // TODO: eventHub.playerEvents.onStateChanged.Raise(to);
         }
 
+        private void OnPlayerDeath()
+        {
+            _fsm.ChangeState(PlayerState.Dead);
+            // TODO: eventHub.playerEvents.onPlayerDead.Raise();
+        }
+
         // ── IDebugStateProvider ───────────────────────────────────────────
 
         public string GetDebugStateName() => _fsm?.CurrentState.ToString() ?? "Uninitialized";
+
+#if UNITY_EDITOR
+        // ── Debug ─────────────────────────────────────────────────────────
+
+        [Sirenix.OdinInspector.TitleGroup("Debug")]
+        [Sirenix.OdinInspector.Button("Simulate Hit While Blocking", Sirenix.OdinInspector.ButtonSizes.Medium)]
+        [Sirenix.OdinInspector.GUIColor(1f, 0.5f, 0.3f)]
+        private void DebugSimulateBlockHit()
+        {
+            if (_fsm == null) return;
+
+            if (_fsm.CurrentState == PlayerState.Block &&
+                _states.TryGetValue(PlayerState.Block, out var state))
+            {
+                ((PlayerBlockState)state).OnBlockHit(null);
+                Debug.Log("[Debug] Simulated hit while blocking");
+            }
+            else
+            {
+                Debug.Log($"[Debug] Not in Block state (current: {_fsm.CurrentState})");
+            }
+        }
+#endif
 
         // ── Gizmos ────────────────────────────────────────────────────────
 
