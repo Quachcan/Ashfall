@@ -169,6 +169,12 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         public PlayerState CurrentState => _fsm.CurrentState;
 
+        // ── ICombatStats ──────────────────────────────────────────────────
+
+        public float ATK => stats != null ? stats.atk : 0f;
+        public float MAG => stats != null ? stats.mag : 0f;
+        public float DEF => stats != null ? stats.def : 0f;
+
 
 
         // ── Ground / Wall Detection ───────────────────────────────────────

@@ -176,14 +176,32 @@ namespace _Ashfall._Scripts.Gameplay.Player
             UnityEditor.EditorUtility.SetDirty(this);
 #endif
         }
-        
+
         // ── Health ───────────────────────────────────────────────────────
- 
+
         [TitleGroup("Health")]
         [BoxGroup("Health/Box")]
         [LabelWidth(100)]
         [Tooltip("Maximum HP")]
         public float maxHp = 100f;
+
+        // ── Combat Stats ─────────────────────────────────────────────────
+
+        [TitleGroup("Combat Stats")]
+        [BoxGroup("Combat Stats/Box")]
+        [HorizontalGroup("Combat Stats/Box/Row1")]
+
+        [VerticalGroup("Combat Stats/Box/Row1/Left"), LabelWidth(80)]
+        [Tooltip("Physical attack power — scales basic attack damage")]
+        public float atk  = 20f;
+
+        [VerticalGroup("Combat Stats/Box/Row1/Left"), LabelWidth(80)]
+        [Tooltip("Magic attack power — scales magic skill damage")]
+        public float mag  = 10f;
+
+        [VerticalGroup("Combat Stats/Box/Row1/Right"), LabelWidth(80)]
+        [Tooltip("Defense — reduces both Physical and Magic damage received")]
+        public float def  = 10f;
 
         // ── Attack / Combo ────────────────────────────────────────────────
 

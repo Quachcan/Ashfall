@@ -46,15 +46,16 @@ namespace _Ashfall._Scripts.Gameplay.Combat
 
         private Rigidbody    _rb;
         private HealthSystem _health;
+        private ICombatStats _defenderStats;
 
         /// <summary>
-        /// Inject HealthSystem — called by owner (PlayerController/EnemyBase) after creation.
-        /// Pure C# systems cannot be found via GetComponent.
+        /// Inject systems — called by owner (PlayerController/EnemyBase) after creation.
         /// </summary>
-        public void Initialize(Rigidbody rb, HealthSystem health)
+        public void Initialize(Rigidbody rb, HealthSystem health, ICombatStats defenderStats)
         {
-            _rb     = rb;
-            _health = health;
+            _rb            = rb;
+            _health        = health;
+            _defenderStats = defenderStats;
 
             if (_health != null)
                 _health.OnDeath += OnDeath;
@@ -112,24 +113,19 @@ private void OnDeath()
                 return;
             }
 
-            // Calculate damage:
-            // useAttackerStats = true  → damage from attacker ATK vs defender DEF (basic attack)
-            // useAttackerStats = false → flat damage from HitData (skill, trap, environmental)
-            float rawDamage;
-            if (data.useAttackerStats)
-            {
-                // TODO: DamageCalculation.Calculate(attackerStats.ATK, defenderStats.DEF)
-                // Placeholder until StatSystem is implemented
-                float attackerATK  = GetATK(attacker);
-                float defenderDEF  = GetDEF();
-                rawDamage          = Mathf.Max(1f, attackerATK - defenderDEF);
-            }
-            else
-            {
-                rawDamage = data.flatDamage;
-            }
+            // Resolve attacker stats via ICombatStats interface
+            var attackerStats = attacker?.GetComponent<ICombatStats>();
+            float atkValue    = attackerStats?.ATK ?? 0f;
+            float magValue    = attackerStats?.MAG ?? 0f;
+            float defValue    = _defenderStats?.DEF ?? 0f;
 
-            float finalDamage = rawDamage * multiplier;
+            // Select ATK or MAG based on damage type
+            float offensiveStat = data.damageType == DamageType.Magic ? magValue : atkValue;
+
+            // Calculate final damage via DamageCalculator
+            float finalDamage = data.useAttackerStats
+                ? DamageCalculator.Calculate(offensiveStat, defValue, data.damageType, multiplier)
+                : DamageCalculator.CalculateFlat(data.flatDamage, data.damageType, defValue, multiplier);
 
             if (_health != null)
                 _health.TakeDamage(finalDamage);
@@ -147,22 +143,7 @@ private void OnDeath()
             // TODO: _eventHub.onHit.Raise(...)
         }
 
-        // ── Stat Helpers (placeholder until StatSystem) ───────────────────
 
-        private float GetATK(GameObject attacker)
-        {
-            // TODO: attacker.GetComponent<StatSystem>()?.GetFinalStat(StatType.ATK)
-            // Placeholder — read from PlayerStats SO if available
-            var playerCtrl = attacker?.GetComponent<_Ashfall._Scripts.Gameplay.Player.PlayerController>();
-            // Will be replaced by proper StatSystem
-            return 20f;
-        }
-
-        private float GetDEF()
-        {
-            // TODO: GetComponent<StatSystem>()?.GetFinalStat(StatType.DEF)
-            return 5f;
-        }
 
         // ── Public API ────────────────────────────────────────────────────
 
