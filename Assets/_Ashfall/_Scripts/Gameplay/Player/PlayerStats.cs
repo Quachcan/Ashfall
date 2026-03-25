@@ -233,6 +233,42 @@ namespace _Ashfall._Scripts.Gameplay.Player
         /// <summary>Combo length exposed as property for consistency.</summary>
         public int ComboLength => comboLength;
 
+        // ── Posture ───────────────────────────────────────────────────────
+
+        [TitleGroup("Posture")]
+        [BoxGroup("Posture/Box")]
+        [HorizontalGroup("Posture/Box/Row1")]
+
+        [VerticalGroup("Posture/Box/Row1/Left"), LabelWidth(160)]
+        [Tooltip("Maximum posture before stagger")]
+        public float maxPosture            = 100f;
+
+        [VerticalGroup("Posture/Box/Row1/Left"), LabelWidth(160)]
+        [Tooltip("Seconds before posture starts recovering after last hit")]
+        public float postureRecoverDelay   = 2f;
+
+        [VerticalGroup("Posture/Box/Row1/Right"), LabelWidth(160)]
+        [Tooltip("Posture recovered per second")]
+        public float postureRecoverRate    = 15f;
+
+        [VerticalGroup("Posture/Box/Row1/Right"), LabelWidth(160)]
+        [Tooltip("Seconds player has to land finishing blow after stagger")]
+        public float finishingBlowWindow   = 3f;
+
+        [TitleGroup("Posture")]
+        [BoxGroup("Posture/HitValues")]
+        [InfoBox("Posture added per hit type")]
+        [HorizontalGroup("Posture/HitValues/Row")]
+
+        [VerticalGroup("Posture/HitValues/Row/Left"), LabelWidth(160)]
+        public float posturePerHit         = 20f;
+
+        [VerticalGroup("Posture/HitValues/Row/Left"), LabelWidth(160)]
+        public float posturePerParry       = 50f;
+
+        [VerticalGroup("Posture/HitValues/Row/Right"), LabelWidth(160)]
+        public float posturePerBackstab    = 100f;
+
         // ── Block / Parry ─────────────────────────────────────────────────
 
         [TitleGroup("Block & Parry")]

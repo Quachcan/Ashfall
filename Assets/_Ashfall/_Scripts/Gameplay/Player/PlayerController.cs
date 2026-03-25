@@ -37,6 +37,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         // Pure C# systems — ticked manually, no MonoBehaviour Update overhead
         private StaminaSystem _stamina;
         private HealthSystem  _health;
+        private PostureSystem _posture;
 
         // ── FSM ───────────────────────────────────────────────────────────
 
@@ -77,6 +78,11 @@ namespace _Ashfall._Scripts.Gameplay.Player
             // Create pure C# systems — no MonoBehaviour, ticked manually
             _stamina = new StaminaSystem(stats);
             _health  = new HealthSystem(stats.maxHp);
+            _posture = new PostureSystem(
+                stats.maxPosture,
+                stats.postureRecoverDelay,
+                stats.postureRecoverRate,
+                stats.finishingBlowWindow);
 
             // Subscribe health events
             _health.OnDeath += OnPlayerDeath;
@@ -101,6 +107,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         {
             if (_fsm == null) return;
             _stamina.Tick(Time.deltaTime);   // tick pure C# systems
+            _posture.Tick(Time.deltaTime);
             UpdateDashCooldown();
             _fsm.Tick();
             UpdateAnimator();

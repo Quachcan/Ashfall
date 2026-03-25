@@ -47,18 +47,28 @@ namespace _Ashfall._Scripts.Gameplay.Combat
         private Rigidbody    _rb;
         private HealthSystem _health;
         private ICombatStats _defenderStats;
+        private PostureSystem _posture;
 
         /// <summary>
         /// Inject systems — called by owner (PlayerController/EnemyBase) after creation.
         /// </summary>
-        public void Initialize(Rigidbody rb, HealthSystem health, ICombatStats defenderStats)
+        public void Initialize(Rigidbody rb, HealthSystem health,
+                               ICombatStats defenderStats, PostureSystem posture)
         {
             _rb            = rb;
             _health        = health;
             _defenderStats = defenderStats;
+            _posture       = posture;
 
             if (_health != null)
                 _health.OnDeath += OnDeath;
+
+            if (_posture != null)
+            {
+                _posture.OnStagger      += OnStagger;
+                _posture.OnStaggerEnd   += OnStaggerEnd;
+                _posture.OnFinishingBlow += OnFinishingBlow;
+            }
         }
 
         // ── IHittable ─────────────────────────────────────────────────────
@@ -137,8 +147,13 @@ private void OnDeath()
 
             ApplyKnockback(data, hitDirection);
 
-            // TODO: GetComponent<PoiseSystem>()?.TakePoiseDamage(data.poiseDamage);
+            // Add posture damage
+            _posture?.AddFromHit(data.poiseDamage);
+
             PlayHitReaction(zone);
+
+            // Notify owner — DummyEnemy/EnemyBase subscribes to trigger state transitions
+            OnHitReceived?.Invoke(data, hitPoint, hitDirection, attacker);
 
             // TODO: _eventHub.onHit.Raise(...)
         }
@@ -147,12 +162,24 @@ private void OnDeath()
 
         // ── Public API ────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Raised when a hit lands — owner can subscribe to react visually/logically.
+        /// Raised AFTER damage is applied to HealthSystem.
+        /// </summary>
+        public event System.Action<HitData, Vector3, Vector3, GameObject> OnHitReceived;
+
         /// <summary>Set invincibility for a duration (dash i-frame, respawn, etc.).</summary>
         public void SetInvincible(bool invincible, float duration = 0f)
         {
             _isInvincible    = invincible;
             _invincibleTimer = invincible ? duration : 0f;
         }
+
+        /// <summary>Add posture from parry — called by ParryState on success.</summary>
+        public void AddPostureFromParry(float amount) => _posture?.AddFromParry(amount);
+
+        /// <summary>Add posture from backstab.</summary>
+        public void AddPostureFromBackstab(float amount) => _posture?.AddFromBackstab(amount);
 
         /// <summary>Set blocking state — routes hits to block logic instead of damage.</summary>
         public void SetBlocking(bool blocking)
@@ -243,6 +270,25 @@ private void OnDeath()
             HurtboxZoneType.BlockZone => blockZone,
             _                         => null
         };
+
+        private void OnStagger()
+        {
+            // TODO: GetComponent<PlayerController>()?.ChangeState(PlayerState.Stagger);
+            // TODO: GetComponent<EnemyBase>()?.TriggerStagger();
+            Debug.Log($"[HurtboxController] {gameObject.name} staggered!");
+        }
+
+        private void OnStaggerEnd()
+        {
+            // TODO: notify owner to exit stagger state
+            Debug.Log($"[HurtboxController] {gameObject.name} recovered from stagger.");
+        }
+
+        private void OnFinishingBlow()
+        {
+            // TODO: trigger finishing blow death animation
+            Debug.Log($"[HurtboxController] {gameObject.name} finishing blow!");
+        }
 
 #if UNITY_EDITOR
         [TitleGroup("Debug")]
