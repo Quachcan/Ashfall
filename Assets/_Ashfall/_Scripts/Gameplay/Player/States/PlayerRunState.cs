@@ -31,20 +31,23 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Flip sprite to face movement direction
             _controller.SetFacingDirection(_ctx.Input.MoveX);
 
+            // Crouch toggle while running → CrouchWalk
             if (_ctx.Input.CrouchToggled)
             {
                 _ctx.Input.ConsumeCrouch();
-                _controller.ChangeState(PlayerState.CrouchIdle);
+                _controller.ChangeState(PlayerState.CrouchWalk);
                 return;
             }
 
-            if (_ctx.CanBlock & _ctx.Input.BlockPressed)
+            // Block/Parry — Fighter only
+            if (_ctx.CanBlock && _ctx.Input.BlockPressed)
             {
                 _ctx.Input.ConsumeBlock();
+                // Will resolve tap vs hold in BlockState based on timing
                 _controller.ChangeState(PlayerState.Block);
                 return;
             }
-            
+
             // Jump input
             if (_ctx.Input.JumpPressed)
             {
@@ -68,7 +71,8 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 _controller.ChangeState(PlayerState.Attack);
                 return;
             }
-            
+
+            // Crouch toggle → CrouchWalk or CrouchIdle
             if (_ctx.Input.IsCrouching)
             {
                 _controller.ChangeState(
@@ -107,18 +111,20 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         private void ApplyMovement()
         {
             float input       = _ctx.Input.MoveX;
-            bool  isSprinting = _ctx.Input.SprintHeld && Mathf.Abs(input) > 0.1f;
 
+            // Sprint requires stamina — stop sprinting if exhausted mid-sprint
+            bool  isSprinting = _ctx.Input.SprintHeld && Mathf.Abs(input) > 0.1f;
             if (isSprinting)
             {
-                bool hasStamina = _ctx.Stamina.DrainSprint();
+                bool hasStamina = _ctx.Stamina.DrainSprint(Time.fixedDeltaTime);
                 if (!hasStamina)
                 {
+                    // Ran out of stamina — force exit sprint
                     _ctx.Input.ConsumeSprint();
                     isSprinting = false;
                 }
             }
-            
+
             // Sprint uses moveSpeed as target, run uses runSpeed as target
             float topSpeed   = isSprinting ? _ctx.Stats.moveSpeed : _ctx.Stats.runSpeed;
             float targetVelX = input * topSpeed;

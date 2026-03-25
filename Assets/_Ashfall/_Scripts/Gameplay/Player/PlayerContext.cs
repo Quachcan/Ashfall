@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using _Ashfall._Scripts.Gameplay.Combat;
 
 namespace _Ashfall._Scripts.Gameplay.Player
 {
@@ -17,6 +18,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         public readonly PlayerStats        Stats;
         public readonly CapsuleCollider    Collider;
         public readonly StaminaSystem      Stamina;
+        public readonly HealthSystem       Health;
 
         // ── Shared Runtime State ──────────────────────────────────────────
 
@@ -25,7 +27,11 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         /// <summary>True while the player is in a crouch state.</summary>
         public bool IsCrouching { get; set; }
-        
+
+        /// <summary>
+        /// True if this class can block/parry.
+        /// Set by PlayerController based on PlayerStats — only Fighter has block.
+        /// </summary>
         public bool CanBlock { get; set; }
 
         /// <summary>True when the player is touching the ground this frame.</summary>
@@ -80,7 +86,8 @@ namespace _Ashfall._Scripts.Gameplay.Player
             PlayerInputHandler input,
             PlayerStats        stats,
             CapsuleCollider    collider,
-            StaminaSystem      stamina)
+            StaminaSystem      stamina,
+            HealthSystem       health)
         {
             Rb        = rb;
             Transform = transform;
@@ -89,6 +96,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
             Stats     = stats;
             Collider  = collider;
             Stamina   = stamina;
+            Health    = health;
         }
     }
 }
