@@ -50,9 +50,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         public static readonly int GuardBreak   = Animator.StringToHash("GuardBreak");
 
         // Combat — Hit Reactions
-        public static readonly int HitReact_Head  = Animator.StringToHash("HitReact_Head");
-        public static readonly int HitReact_Torso = Animator.StringToHash("HitReact_Torso");
-        public static readonly int HitReact_Legs  = Animator.StringToHash("HitReact_Legs");
+        public static readonly int HitReact = Animator.StringToHash("HitReact");
 
         // State
         public static readonly int Dead         = Animator.StringToHash("Dead");

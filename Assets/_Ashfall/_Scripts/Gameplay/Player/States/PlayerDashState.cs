@@ -46,8 +46,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             _ctx.AnimMoveSpeed = 0f;
             _ctx.Animator?.SetTrigger(AnimHash.Dash);
 
-            // TODO: enable i-frames via combat system
-            // _ctx.Combat.SetInvincible(true, _ctx.Stats.dashDuration);
+            _ctx.Hurtbox?.SetInvincible(true, _ctx.Stats.dashDuration);
         }
 
         public void Exit()
@@ -58,8 +57,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Dash always exits to standing states — clear crouch regardless of how dash was entered
             _ctx.Input.ClearCrouch();
 
-            // TODO: disable i-frames
-            // _ctx.Combat.SetInvincible(false);
+            _ctx.Hurtbox?.SetInvincible(false);
         }
 
         public void Tick()

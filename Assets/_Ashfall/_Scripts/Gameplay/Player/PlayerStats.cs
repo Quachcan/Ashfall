@@ -1,5 +1,6 @@
 ﻿using Sirenix.OdinInspector;
 using UnityEngine;
+using _Ashfall._Scripts.Gameplay.Combat;
 
 namespace _Ashfall._Scripts.Gameplay.Player
 {
@@ -230,8 +231,18 @@ namespace _Ashfall._Scripts.Gameplay.Player
         [Tooltip("Total hits in the combo — must match number of Attack states in Animator")]
         public int comboLength     = 3;
 
-        /// <summary>Combo length exposed as property for consistency.</summary>
-        public int ComboLength => comboLength;
+        [TitleGroup("Attack")]
+        [BoxGroup("Attack/ComboData")]
+        [InfoBox("One AttackData SO per combo hit. Index 0 = first hit. Length overrides comboLength.")]
+        [Tooltip("Per-hit AttackData SOs — defines animation, damage, crit, knockback per combo hit")]
+        public AttackData[] comboAttacks;
+
+        /// <summary>
+        /// Combo length — uses comboAttacks array length when assigned, falls back to comboLength field.
+        /// </summary>
+        public int ComboLength => comboAttacks != null && comboAttacks.Length > 0
+            ? comboAttacks.Length
+            : comboLength;
 
         // ── Posture ───────────────────────────────────────────────────────
 

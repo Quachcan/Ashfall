@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace _Ashfall._Scripts.Gameplay.Combat
 {
@@ -7,13 +7,13 @@ namespace _Ashfall._Scripts.Gameplay.Combat
         /// <summary>
         /// Receive a hit with the given data.
         /// </summary>
-        /// <param name="data">Damage, knockback, poise damage values.</param>
-        /// <param name="hitPoint">World position where the hit landed.</param>
-        /// <param name="hitDirection">Normalized directions from attacker to target.</param>
-        /// <param name="attacker">The GameObject that landed the hit.</param>
-        void TakeHit(HitData data, Vector3 hitPoint, Vector3 hitDirection, GameObject attacker);
-        
-        /// <summary>True if currently invincible (i-frame, dead, cutscene, etc.).</summary>
+        /// <param name="data">AttackData SO chứa damage, knockback, crit, v.v.</param>
+        /// <param name="hitPoint">World position nơi đòn chạm.</param>
+        /// <param name="hitDirection">Hướng normalized từ attacker đến target.</param>
+        /// <param name="attacker">GameObject thực hiện đòn đánh.</param>
+        void TakeHit(AttackData data, Vector3 hitPoint, Vector3 hitDirection, GameObject attacker);
+
+        /// <summary>True nếu đang invincible (i-frame, dead, cutscene, v.v.).</summary>
         bool IsInvincible { get; }
     }
 }

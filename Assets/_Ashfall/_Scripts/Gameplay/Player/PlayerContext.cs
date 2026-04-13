@@ -77,6 +77,17 @@ namespace _Ashfall._Scripts.Gameplay.Player
         /// <summary>Remaining cooldown time in seconds.</summary>
         public float DashCooldownTimer { get; set; }
 
+        // ── Combat ────────────────────────────────────────────────────────
+
+        /// <summary>Reference to the HurtboxController — used by states for i-frames, blocking, etc.</summary>
+        public HurtboxController Hurtbox { get; set; }
+
+        /// <summary>Reference to the weapon HitboxWeapon — activated on attack hit frame, deactivated on end.</summary>
+        public HitboxWeapon Hitbox { get; set; }
+
+        /// <summary>Duration passed from the hit that triggered knockback — read by PlayerKnockbackState.</summary>
+        public float PendingKnockbackDuration { get; set; }
+
         // ── Constructor ───────────────────────────────────────────────────
 
         public PlayerContext(

@@ -16,6 +16,7 @@
         Block,
         Parry,
         GuardBreak,
+        Knockback,
         Dead
     }
 }
