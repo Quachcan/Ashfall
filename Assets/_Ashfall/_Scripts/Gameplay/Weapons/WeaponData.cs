@@ -5,14 +5,17 @@ using _Ashfall._Scripts.Gameplay.Combat;
 namespace _Ashfall._Scripts.Gameplay.Weapons
 {
     /// <summary>
-    /// ScriptableObject config for a single weapon.
-    /// Holds all weapon-specific combat data: stats, combo moves, block/parry config,
-    /// stamina costs, and visual/animation assets.
+    /// Pure combat data for one weapon type.
+    /// Contains ONLY numbers and logic config — zero visual/animation assets.
     ///
-    /// Create one asset per weapon (WeaponData_Sword, WeaponData_DualSword, etc.).
-    /// Assign to WeaponHandler.defaultWeapon or swap at runtime via WeaponHandler.Equip().
+    /// Visual assets (model prefab, animator, icon) live in WeaponVisuals SO.
+    /// The two SOs are linked via WeaponType enum, not by direct reference,
+    /// so WeaponData can be loaded without pulling any heavy assets into memory.
+    ///
+    /// Create one asset per weapon type:
+    ///   WeaponData_Sword, WeaponData_DualSword, WeaponData_Staff, WeaponData_Bow
     /// </summary>
-    [CreateAssetMenu(menuName = "Ashfall/Weapons/WeaponData", fileName = "WeaponData_New")]
+    [CreateAssetMenu(menuName = "Ashfall/Weapons/WeaponData", fileName = "WeaponData_New", order = -1000)]
     public class WeaponData : ScriptableObject
     {
         // ── Identity ──────────────────────────────────────────────────────
@@ -21,28 +24,12 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         [HorizontalGroup("Identity/Row")]
 
         [VerticalGroup("Identity/Row/Left"), LabelWidth(120)]
-        [Tooltip("Display name of this weapon")]
+        [Tooltip("Display name used in UI and debug logs")]
         public string weaponName = "Weapon";
 
         [VerticalGroup("Identity/Row/Left"), LabelWidth(120)]
+        [Tooltip("Must match the weaponType field on the corresponding WeaponVisuals SO")]
         public WeaponType weaponType = WeaponType.Sword;
-
-        [VerticalGroup("Identity/Row/Right"), LabelWidth(120)]
-        [PreviewField(50, ObjectFieldAlignment.Right)]
-        public Sprite icon;
-
-        // ── Visual & Animation ─────────────────────────────────────────────
-
-        [TitleGroup("Visual & Animation")]
-        [HorizontalGroup("Visual & Animation/Row")]
-
-        [VerticalGroup("Visual & Animation/Row/Left"), LabelWidth(150)]
-        [Tooltip("Weapon model prefab — instantiated into the weapon socket on equip")]
-        public GameObject weaponPrefab;
-
-        [VerticalGroup("Visual & Animation/Row/Right"), LabelWidth(150)]
-        [Tooltip("Full AnimatorController for this weapon — overrides player animator on equip")]
-        public RuntimeAnimatorController animatorController;
 
         // ── Stats ─────────────────────────────────────────────────────────
 
@@ -121,18 +108,6 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         [ShowIf("canBlock")]
         [Tooltip("Duration of guard break stagger (seconds)")]
         public float guardBreakDuration = 1.5f;
-
-        [TitleGroup("Block & Parry")]
-        [BoxGroup("Block & Parry/ParryClips")]
-        [ShowIf("canBlock")]
-        [InfoBox("Drag parry animation clips here. One is picked randomly each parry.")]
-        [Tooltip("Parry animation clips — one picked randomly per parry")]
-        public AnimationClip[] parryClips;
-
-        [BoxGroup("Block & Parry/ParryClips")]
-        [ShowIf("canBlock")]
-        [Tooltip("The placeholder clip in the Animator used as the override key")]
-        public AnimationClip parryStateClip;
 
         // ── Stamina Costs ─────────────────────────────────────────────────
 
