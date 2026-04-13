@@ -40,7 +40,10 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         private float _attackTimer;
 
         /// <summary>True while the current hit animation is still playing.</summary>
-        private bool  _hitInProgress;
+        private bool _hitInProgress;
+
+        /// <summary>AttackData of the hit currently playing — read by OnAttackEnd for per-hit timing.</summary>
+        private AttackData _currentAttackData;
 
         public PlayerAttackState(PlayerController controller, PlayerContext ctx)
         {
@@ -67,6 +70,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             _comboIndex        = 0;
             _nextAttackQueued  = false;
             _hitInProgress     = false;
+            _currentAttackData = null;
             _ctx.AnimMoveSpeed = 0f;
             _ctx.Hitbox?.SetActive(false); // ensure hitbox is off if combo is interrupted
         }
@@ -140,8 +144,8 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             }
             else
             {
-                // No queued input — open combo window and wait
-                _comboWindowTimer = weapon.comboWindowTime;
+                // No queued input — open per-hit combo window and wait
+                _comboWindowTimer = _currentAttackData?.comboWindowTime ?? 0.8f;
             }
         }
 
@@ -153,13 +157,16 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
             _hitInProgress    = true;
             _nextAttackQueued = false;
-            _attackTimer      = weapon.attackDuration;
 
             if (_ctx.Animator == null) return;
             if (index <= 0 || index > weapon.ComboLength) return;
 
             var attacks = weapon.comboAttacks;
             AttackData data = attacks != null && attacks.Length >= index ? attacks[index - 1] : null;
+
+            // Store so OnAttackEnd can read per-hit timing without re-resolving
+            _currentAttackData = data;
+            _attackTimer       = data?.attackDuration ?? 0.4f;
 
             // Push current hit's AttackData to the hitbox before the swing opens
             _ctx.Hitbox?.SetAttackData(data);

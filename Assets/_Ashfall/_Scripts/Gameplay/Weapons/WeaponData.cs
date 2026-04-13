@@ -56,15 +56,7 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         [BoxGroup("Combat/Combo")]
         [HorizontalGroup("Combat/Combo/Row")]
 
-        [VerticalGroup("Combat/Combo/Row/Left"), LabelWidth(150)]
-        [Tooltip("Time window after each hit to queue the next attack (seconds)")]
-        public float comboWindowTime = 0.8f;
-
-        [VerticalGroup("Combat/Combo/Row/Left"), LabelWidth(150)]
-        [Tooltip("Fallback attack duration if Animator events are not wired (seconds)")]
-        public float attackDuration = 0.4f;
-
-        [VerticalGroup("Combat/Combo/Row/Right"), LabelWidth(150), Range(0f, 1f)]
+        [VerticalGroup("Combat/Combo/Row/Left"), LabelWidth(150), Range(0f, 1f)]
         [Tooltip("Movement speed scale during an attack [0 = stop, 1 = full speed]")]
         public float attackMoveScale = 0.3f;
 
