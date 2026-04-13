@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -13,15 +13,18 @@ namespace _Ashfall._Scripts.Gameplay.Combat
     ///   AnimatorEventBridge.OnAttackEnd() → SetActive(false) — end of hit window
     ///
     /// Prevents hitting same target multiple times per swing via hit list.
+    ///
+    /// Note: OnTriggerEnter alone is unreliable for combos — if the target is already
+    /// inside the collider when it re-enables (same-frame disable/enable), Unity may
+    /// skip the event. CheckOverlap() on SetActive(true) covers this case.
     /// </summary>
-    // [RequireComponent(typeof(Collider))]
     public class HitboxWeapon : MonoBehaviour
     {
         // ── Inspector ─────────────────────────────────────────────────────
 
         [TitleGroup("Config")]
-        [Tooltip("Hit data for this attack — drag HitData SO here")]
-        [SerializeField] private HitData hitData;
+        [Tooltip("Attack data for this attack — drag AttackData SO here")]
+        [SerializeField] private AttackData attackData;
 
         [Tooltip("Layer mask of valid targets (EnemyHurtbox or PlayerHurtbox)")]
         [SerializeField] private LayerMask targetLayer;
@@ -32,57 +35,34 @@ namespace _Ashfall._Scripts.Gameplay.Combat
 
         // ── Internal ──────────────────────────────────────────────────────
 
-        private Collider               _collider;
+        private Collider                     _collider;
         private readonly HashSet<GameObject> _hitThisSwing = new();
+        private GameObject                   _owner;
 
-        // Owner — the root GameObject (Player or Enemy)
-        private GameObject _owner;
+        private static readonly Collider[] OverlapBuffer = new Collider[16];
 
         // ── Unity Lifecycle ───────────────────────────────────────────────
 
         private void Awake()
         {
-            _collider         = GetComponent<Collider>();
+            _collider           = GetComponent<Collider>();
             _collider.isTrigger = true;
-            _owner            = GetRootOwner();
+            _owner              = transform.root.gameObject;
 
-            // Always start inactive — activated by AnimatorEventBridge
             SetActive(false);
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!_isActive)    return;
-            if (hitData == null) return;
-
-            // Skip if already hit this target this swing
-            var root = GetHittableRoot(other.gameObject);
-            if (root == null)                  return;
-            if (_hitThisSwing.Contains(root))  return;
-
-            // Skip owner's own hurtbox
-            if (root == _owner) return;
-
-            // Check IHittable
-            var hittable = root.GetComponent<IHittable>();
-            if (hittable == null || hittable.IsInvincible) return;
-
-            // Record hit to prevent multi-hit this swing
-            _hitThisSwing.Add(root);
-
-            // Calculate hit direction (attacker → target)
-            Vector3 dir = (root.transform.position - _owner.transform.position).normalized;
-            dir.z = 0f; // lock to 2.5D plane
-
-            // Deliver hit
-            hittable.TakeHit(hitData, other.ClosestPoint(transform.position), dir, _owner);
+            if (!_isActive || attackData == null) return;
+            ProcessHit(other);
         }
 
         // ── Public API ────────────────────────────────────────────────────
 
         /// <summary>
         /// Enable or disable the hitbox.
-        /// Called by AnimatorEventBridge on attack hit/end events.
+        /// Called by PlayerAttackState on OnAttackHit / OnAttackEnd events.
         /// </summary>
         public void SetActive(bool active)
         {
@@ -90,18 +70,63 @@ namespace _Ashfall._Scripts.Gameplay.Combat
             _collider.enabled = active;
 
             if (!active)
-                _hitThisSwing.Clear(); // reset per swing
+            {
+                _hitThisSwing.Clear();
+            }
+            else
+            {
+                // Immediately scan for targets already inside the collider.
+                // OnTriggerEnter won't fire if the collider was disabled/re-enabled
+                // in the same physics frame (common during fast combos).
+                CheckOverlap();
+            }
         }
 
-        /// <summary>Swap hit data at runtime (different combo hits, skill types).</summary>
-        public void SetHitData(HitData data) => hitData = data;
+        /// <summary>Swap attack data at runtime (different combo hits, skill types).</summary>
+        public void SetAttackData(AttackData data) => attackData = data;
 
-        // ── Helpers ───────────────────────────────────────────────────────
+        // ── Private ───────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Walk up the hierarchy to find the root GameObject with IHittable.
-        /// Hurtboxes are child objects — we need their root owner.
-        /// </summary>
+        private void ProcessHit(Collider other)
+        {
+            var root = GetHittableRoot(other.gameObject);
+            if (root == null || root == _owner)          return;
+            if (_hitThisSwing.Contains(root))            return;
+
+            var hittable = root.GetComponent<IHittable>();
+            if (hittable == null || hittable.IsInvincible) return;
+
+            _hitThisSwing.Add(root);
+
+            Vector3 dir = (root.transform.position - _owner.transform.position).normalized;
+            dir.z = 0f;
+
+            hittable.TakeHit(attackData, other.ClosestPoint(transform.position), dir, _owner);
+        }
+
+        private void CheckOverlap()
+        {
+            if (attackData == null) return;
+
+            int count = 0;
+
+            if (_collider is SphereCollider sc)
+            {
+                Vector3 center = sc.transform.TransformPoint(sc.center);
+                float   radius = sc.radius * sc.transform.lossyScale.x;
+                count = Physics.OverlapSphereNonAlloc(center, radius, OverlapBuffer, targetLayer, QueryTriggerInteraction.Collide);
+            }
+            else if (_collider is BoxCollider bc)
+            {
+                Vector3 center  = bc.transform.TransformPoint(bc.center);
+                Vector3 halfExt = Vector3.Scale(bc.size * 0.5f, bc.transform.lossyScale);
+                count = Physics.OverlapBoxNonAlloc(center, halfExt, OverlapBuffer, bc.transform.rotation, targetLayer, QueryTriggerInteraction.Collide);
+            }
+
+            for (int i = 0; i < count; i++)
+                ProcessHit(OverlapBuffer[i]);
+        }
+
         private GameObject GetHittableRoot(GameObject obj)
         {
             var t = obj.transform;
@@ -114,22 +139,16 @@ namespace _Ashfall._Scripts.Gameplay.Combat
             return null;
         }
 
-        /// <summary>Gets the root owner (top of hierarchy) for self-hit prevention.</summary>
-        private GameObject GetRootOwner()
-        {
-            return transform.root.gameObject;
-        }
-
         // ── Gizmos ────────────────────────────────────────────────────────
 
 #if UNITY_EDITOR
-        [Sirenix.OdinInspector.TitleGroup("Debug")]
-        [Sirenix.OdinInspector.Button("Force Activate (1s)"), Sirenix.OdinInspector.GUIColor(1f, 0.5f, 0.3f)]
+        [TitleGroup("Debug")]
+        [Button("Force Activate (3s)"), GUIColor(1f, 0.5f, 0.3f)]
         private void DebugActivate()
         {
             SetActive(true);
             Invoke(nameof(DebugDeactivate), 3f);
-            UnityEngine.Debug.Log("[HitboxWeapon] Force activated for 1s");
+            Debug.Log("[HitboxWeapon] Force activated for 3s");
         }
 
         private void DebugDeactivate() => SetActive(false);

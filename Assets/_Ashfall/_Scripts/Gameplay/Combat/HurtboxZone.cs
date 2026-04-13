@@ -13,7 +13,7 @@ namespace _Ashfall._Scripts.Gameplay.Combat
     [RequireComponent(typeof(Collider))]
     public class HurtboxZone : MonoBehaviour
     {
-        [SerializeField] private HurtboxZoneType zoneType = HurtboxZoneType.Torso;
+        [SerializeField] private HurtboxZoneType zoneType;
 
         /// <summary>Which body region this collider represents.</summary>
         public HurtboxZoneType ZoneType => zoneType;

@@ -1,4 +1,5 @@
 ﻿using _Ashfall._Scripts.Core.StateMachineCore;
+using _Ashfall._Scripts.Gameplay.Combat;
 using UnityEngine;
 
 namespace _Ashfall._Scripts.Gameplay.Player.States
@@ -63,10 +64,11 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void Exit()
         {
-            _comboIndex       = 0;
-            _nextAttackQueued = false;
-            _hitInProgress    = false;
+            _comboIndex        = 0;
+            _nextAttackQueued  = false;
+            _hitInProgress     = false;
             _ctx.AnimMoveSpeed = 0f;
+            _ctx.Hitbox?.SetActive(false); // ensure hitbox is off if combo is interrupted
         }
 
         public void Tick()
@@ -113,8 +115,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         /// </summary>
         public void OnAttackHit()
         {
-            // TODO: activate hitbox for this frame
-            // _ctx.Combat.ActivateHitbox(_comboIndex);
+            _ctx.Hitbox?.SetActive(true);
         }
 
         /// <summary>
@@ -123,6 +124,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         /// </summary>
         public void OnAttackEnd()
         {
+            _ctx.Hitbox?.SetActive(false);
             _hitInProgress = false;
             _attackTimer   = 0f;
 
@@ -152,9 +154,18 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             if (_ctx.Animator == null) return;
             if (index <= 0 || index > _ctx.Stats.ComboLength) return;
 
-            // Generate state hash from naming convention "Attack_1", "Attack_2"...
-            // No hardcoded array — comboLength in SO controls how many hits exist
-            _ctx.Animator.CrossFade(AnimHash.GetAttackStateHash(index), 0.05f, 0);
+            var attacks = _ctx.Stats.comboAttacks;
+            AttackData data = attacks != null && attacks.Length >= index ? attacks[index - 1] : null;
+
+            // Push current hit's AttackData to the hitbox before the swing opens
+            _ctx.Hitbox?.SetAttackData(data);
+
+            // Use animStateName from SO when available, fall back to "Attack_N" convention
+            int stateHash = data != null && !string.IsNullOrEmpty(data.animStateName)
+                ? Animator.StringToHash(data.animStateName)
+                : AnimHash.GetAttackStateHash(index);
+
+            _ctx.Animator.CrossFade(stateHash, 0.05f, 0);
         }
 
         private void EndCombo()

@@ -104,43 +104,35 @@ namespace _Ashfall._Scripts.Gameplay.Combat
 
         // ── Hit Response ──────────────────────────────────────────────────
 
-        private void OnHitReceived(HitData data, Vector3 hitPoint,
+        private void OnHitReceived(AttackData data, Vector3 hitPoint,
                                    Vector3 direction, GameObject attacker)
         {
             if (_health.IsDead) return;
             if (_status == "Staggered") return;
 
-            if (data.knockbackForce > 0.5f)
+            if (data.causesKnockback)
             {
-                StartCoroutine(KnockbackRoutine(direction, data.knockbackForce,
-                                                data.knockbackDuration));
+                StartCoroutine(KnockbackRoutine(data.knockbackDuration));
             }
             else
             {
-                PlayHitReact(hitPoint);
+                PlayHitReact();
             }
         }
 
-        private void PlayHitReact(Vector3 hitPoint)
+        private void PlayHitReact()
         {
-            float relY = hitPoint.y - transform.position.y;
-            string trigger = relY > 1.4f ? "HitReact_Head" :
-                             relY > 0.6f ? "HitReact_Torso" : "HitReact_Legs";
-            animator?.SetTrigger(trigger);
+            animator?.SetTrigger("HitReact");
             _status = "HitReact";
             StartCoroutine(ResetStatusAfter(0.5f));
         }
 
-        private IEnumerator KnockbackRoutine(Vector3 direction, float force, float duration)
+        private IEnumerator KnockbackRoutine(float duration)
         {
             _status = "Knockback";
-            animator?.SetTrigger("HitReact_Torso");
+            animator?.SetTrigger("HitReact");
 
-            Vector3 knockForce = direction * force;
-            knockForce.z       = 0f;
-            _rb.linearVelocity = Vector3.zero;
-            _rb.AddForce(knockForce, ForceMode.Impulse);
-
+            // Physics impulse already applied by HurtboxController.ApplyKnockback
             yield return new WaitForSeconds(duration);
 
             _rb.linearVelocity = Vector3.zero;

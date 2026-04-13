@@ -129,7 +129,6 @@ GameObject:
   m_Component:
   - component: {fileID: 110005368}
   - component: {fileID: 110005369}
-  - component: {fileID: 110005370}
   m_Layer: 9
   m_Name: Hurtbox_Leg_L
   m_TagString: Untagged
@@ -175,19 +174,6 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: -0.5, z: -0.02}
---- !u!114 &110005370
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 110005367}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 1
 --- !u!137 &154356981
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0
@@ -2931,7 +2917,6 @@ GameObject:
   m_Component:
   - component: {fileID: 171557317}
   - component: {fileID: 171557318}
-  - component: {fileID: 171557319}
   m_Layer: 9
   m_Name: Hurtbox_Leg_L
   m_TagString: Untagged
@@ -2977,19 +2962,6 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: -0.5, z: -0.02}
---- !u!114 &171557319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 171557316}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 1
 --- !u!1 &215266267
 GameObject:
   m_ObjectHideFlags: 0
@@ -3000,7 +2972,6 @@ GameObject:
   m_Component:
   - component: {fileID: 215266268}
   - component: {fileID: 215266270}
-  - component: {fileID: 215266269}
   m_Layer: 10
   m_Name: HurtBox_Head
   m_TagString: Untagged
@@ -3023,19 +2994,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 636437709}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &215266269
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 215266267}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 2
 --- !u!136 &215266270
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3069,7 +3027,6 @@ GameObject:
   m_Component:
   - component: {fileID: 238609136}
   - component: {fileID: 238609137}
-  - component: {fileID: 238609138}
   m_Layer: 9
   m_Name: Hurtbox_Torso
   m_TagString: Untagged
@@ -3115,19 +3072,6 @@ CapsuleCollider:
   m_Height: 0.6
   m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &238609138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 238609135}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 0
 --- !u!1 &326271150
 GameObject:
   m_ObjectHideFlags: 0
@@ -3733,13 +3677,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a35ce6bbb95454cbb5e493771aa1875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxController
-  headZone: {fileID: 1566446296}
-  torsoZone: {fileID: 238609138}
-  legsZone: {fileID: 110005370}
   blockZone: {fileID: 326271152}
-  headMultiplier: 1.5
-  torsoMultiplier: 1
-  legsMultiplier: 0.8
 --- !u!1 &757892342
 GameObject:
   m_ObjectHideFlags: 0
@@ -3930,7 +3868,6 @@ GameObject:
   m_Component:
   - component: {fileID: 950230620}
   - component: {fileID: 950230622}
-  - component: {fileID: 950230621}
   m_Layer: 10
   m_Name: HurtBox_Torso
   m_TagString: Untagged
@@ -3953,19 +3890,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 636437709}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &950230621
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 950230619}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 0
 --- !u!136 &950230622
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4094,7 +4018,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1566446294}
   - component: {fileID: 1566446295}
-  - component: {fileID: 1566446296}
   m_Layer: 9
   m_Name: Hurtbox_Head
   m_TagString: Untagged
@@ -4140,19 +4063,6 @@ CapsuleCollider:
   m_Height: 0.3
   m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1566446296
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566446293}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 2
 --- !u!1 &1924629919
 GameObject:
   m_ObjectHideFlags: 0
@@ -4252,13 +4162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a35ce6bbb95454cbb5e493771aa1875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxController
-  headZone: {fileID: 215266269}
-  torsoZone: {fileID: 950230621}
-  legsZone: {fileID: 2097776850}
-  blockZone: {fileID: 0}
-  headMultiplier: 1.5
-  torsoMultiplier: 1
-  legsMultiplier: 0.8
+  blockZone: {fileID: 326271152}
 --- !u!114 &1924629924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4288,7 +4192,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2097776849}
   - component: {fileID: 2097776851}
-  - component: {fileID: 2097776850}
   m_Layer: 10
   m_Name: HurtBox_Leg
   m_TagString: Untagged
@@ -4311,19 +4214,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 636437709}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2097776850
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2097776848}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 1
 --- !u!136 &2097776851
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -15273,7 +15163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36da315be7da44279f59da1d0514a8f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HitboxWeapon
-  hitData: {fileID: 11400000, guid: 4cd276a777e454c449094f57e537cca5, type: 2}
+  attackData: {fileID: 0}
   targetLayer:
     serializedVersion: 2
     m_Bits: 1024

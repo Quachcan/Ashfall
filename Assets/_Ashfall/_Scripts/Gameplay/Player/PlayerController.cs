@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using _Ashfall._Scripts.Gameplay.Combat;
 using _Ashfall._Scripts.Gameplay.Player.States;
@@ -14,7 +15,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(PlayerInputHandler))]
-    public class PlayerController : MonoBehaviour, IDebugStateProvider
+    public class PlayerController : MonoBehaviour, IDebugStateProvider, ICombatStats
     {
         // ── Inspector ─────────────────────────────────────────────────────
 
@@ -35,9 +36,10 @@ namespace _Ashfall._Scripts.Gameplay.Player
         private AnimatorOverrideController _overrideController;
 
         // Pure C# systems — ticked manually, no MonoBehaviour Update overhead
-        private StaminaSystem _stamina;
-        private HealthSystem  _health;
-        private PostureSystem _posture;
+        private StaminaSystem      _stamina;
+        private HealthSystem       _health;
+        private PostureSystem      _posture;
+        private HurtboxController  _hurtbox;
 
         // ── FSM ───────────────────────────────────────────────────────────
 
@@ -88,11 +90,24 @@ namespace _Ashfall._Scripts.Gameplay.Player
             _health.OnDeath += OnPlayerDeath;
 
             // Build shared context — must be created before anything reads _ctx
-            _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina, _health);
-            _ctx.CoyoteTimeDuration = stats.coyoteTime;
+            _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina, _health)
+                {
+                    CoyoteTimeDuration = stats.coyoteTime,
+                    // Set class capability flags — after _ctx is created
+                    CanBlock = stats.canBlock
+                };
 
-            // Set class capability flags — after _ctx is created
-            _ctx.CanBlock = stats.canBlock;
+            // Wire HurtboxController — inject all systems so it can receive hits and react to death/stagger
+            _hurtbox = GetComponent<HurtboxController>();
+            _hurtbox?.Initialize(_rb, _health, this, _posture);
+            _ctx.Hurtbox = _hurtbox;
+
+            // Wire HitboxWeapon — lives on the weapon bone child
+            _ctx.Hitbox = GetComponentInChildren<HitboxWeapon>();
+
+            // Subscribe to hit events — triggers knockback state on strong hits
+            if (_hurtbox != null)
+                _hurtbox.OnHitReceived += OnHitReceived;
 
             // Run checks before FSM init to prevent false Fall on frame 0
             CheckGrounded();
@@ -123,7 +138,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
 
         // ── FSM Builder ───────────────────────────────────────────────────
-
+        
         private StateMachine<PlayerState> BuildFSM()
         {
             _states = new Dictionary<PlayerState, IState>
@@ -139,6 +154,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
                 { PlayerState.Block,       new PlayerBlockState(this, _ctx)       },
                 { PlayerState.Parry,       new PlayerParryState(this, _ctx)       },
                 { PlayerState.GuardBreak,  new PlayerGuardBreakState(this, _ctx)  },
+                { PlayerState.Knockback,   new PlayerKnockbackState(this, _ctx)   },
                 { PlayerState.Dead,        new PlayerDeadState(this, _ctx)        },
             };
 
@@ -360,6 +376,17 @@ namespace _Ashfall._Scripts.Gameplay.Player
         {
             _fsm.ChangeState(PlayerState.Dead);
             // TODO: eventHub.playerEvents.onPlayerDead.Raise();
+        }
+
+        private void OnHitReceived(AttackData data, Vector3 hitPoint, Vector3 direction, GameObject attacker)
+        {
+            if (_fsm.CurrentState == PlayerState.Dead) return;
+
+            if (data.causesKnockback)
+            {
+                _ctx.PendingKnockbackDuration = data.knockbackDuration;
+                _fsm.ChangeState(PlayerState.Knockback);
+            }
         }
 
         // ── IDebugStateProvider ───────────────────────────────────────────
