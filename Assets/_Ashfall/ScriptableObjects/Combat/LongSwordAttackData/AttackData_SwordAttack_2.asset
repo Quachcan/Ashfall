@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d753bd6c8714746b4af6bb1e9049ff53, type: 3}
+  m_Name: AttackData_SwordAttack_2
+  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.AttackData
+  attackName: Attack_2
+  isComboAttack: 1
+  isSpecialAttack: 0
+  animStateName: Attack_2
+  attackDuration: 0.4
+  comboWindowTime: 1
+  damageType: 0
+  useAttackerStats: 1
+  flatDamage: 50
+  poiseDamage: 25
+  blockable: 1
+  critRate: 0
+  critMultiplier: 1.5
+  causesKnockback: 0
+  knockbackForce: 5
+  knockbackUpward: 0.2
+  knockbackDuration: 0.15
+  hitStopDuration: 0.05
