@@ -1,15 +1,15 @@
-﻿using Sirenix.OdinInspector;
+using Sirenix.OdinInspector;
 using UnityEngine;
-using _Ashfall._Scripts.Gameplay.Combat;
 
 namespace _Ashfall._Scripts.Gameplay.Player
 {
     /// <summary>
-    /// ScriptableObject config for all player movement and physics stats.
-    /// Create one asset per class (FighterStats, MageStats, etc.) and swap
-    /// via the PlayerController Inspector — no prefab duplication needed.
+    /// ScriptableObject config for player character movement, physics, and base survivability.
+    /// Contains only character-level stats that are independent of the equipped weapon.
     ///
-    /// All values are live-editable during Play Mode.
+    /// Weapon-specific data (ATK/MAG/DEF, combo moves, block/parry) lives in WeaponData SO.
+    ///
+    /// Create one asset per character variant if needed. All values are live-editable in Play Mode.
     /// </summary>
     [CreateAssetMenu(menuName = "Ashfall/Player/PlayerStats", fileName = "PlayerStats_New")]
     public class PlayerStats : ScriptableObject
@@ -23,9 +23,6 @@ namespace _Ashfall._Scripts.Gameplay.Player
         [BoxGroup("Movement/Box")]
         [HorizontalGroup("Movement/Box/Row1")]
         [VerticalGroup("Movement/Box/Row1/Left"), LabelWidth(120)]
-        [ShowIf("canBlock")]
-        [ShowIf("canBlock")]
-        [ShowIf("canBlock")]
         [Tooltip("Max horizontal speed — sprint cap (units/s)")]
         public float moveSpeed          = 6f;
 
@@ -136,6 +133,75 @@ namespace _Ashfall._Scripts.Gameplay.Player
         [BoxGroup("Detection/Wall"), LabelWidth(140), Range(0.1f, 2f)]
         public float wallCheckDistance     = 0.4f;
 
+        // ── Health ────────────────────────────────────────────────────────
+
+        [TitleGroup("Health")]
+        [BoxGroup("Health/Box"), LabelWidth(100)]
+        [Tooltip("Maximum HP")]
+        public float maxHp = 100f;
+
+        // ── Stamina ───────────────────────────────────────────────────────
+
+        [TitleGroup("Stamina")]
+        [BoxGroup("Stamina/Box")]
+        [HorizontalGroup("Stamina/Box/Row1")]
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Maximum stamina value")]
+        public float maxStamina       = 100f;
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Stamina restored per second when not draining")]
+        public float staminaRegenRate  = 25f;
+
+        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
+        [Tooltip("Seconds after last drain before regen starts")]
+        public float staminaRegenDelay = 1.2f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina cost per dash")]
+        public float dashStaminaCost   = 25f;
+
+        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
+        [Tooltip("Stamina drained per second while sprinting")]
+        public float sprintStaminaDrain = 15f;
+
+        // ── Posture ───────────────────────────────────────────────────────
+
+        [TitleGroup("Posture")]
+        [BoxGroup("Posture/Box")]
+        [HorizontalGroup("Posture/Box/Row1")]
+
+        [VerticalGroup("Posture/Box/Row1/Left"), LabelWidth(160)]
+        [Tooltip("Maximum posture before stagger")]
+        public float maxPosture            = 100f;
+
+        [VerticalGroup("Posture/Box/Row1/Left"), LabelWidth(160)]
+        [Tooltip("Seconds before posture starts recovering after last hit")]
+        public float postureRecoverDelay   = 2f;
+
+        [VerticalGroup("Posture/Box/Row1/Right"), LabelWidth(160)]
+        [Tooltip("Posture recovered per second")]
+        public float postureRecoverRate    = 15f;
+
+        [VerticalGroup("Posture/Box/Row1/Right"), LabelWidth(160)]
+        [Tooltip("Seconds player has to land finishing blow after stagger")]
+        public float finishingBlowWindow   = 3f;
+
+        [TitleGroup("Posture")]
+        [BoxGroup("Posture/HitValues")]
+        [InfoBox("Posture damage added per hit type received")]
+        [HorizontalGroup("Posture/HitValues/Row")]
+
+        [VerticalGroup("Posture/HitValues/Row/Left"), LabelWidth(160)]
+        public float posturePerHit      = 20f;
+
+        [VerticalGroup("Posture/HitValues/Row/Left"), LabelWidth(160)]
+        public float posturePerParry    = 50f;
+
+        [VerticalGroup("Posture/HitValues/Row/Right"), LabelWidth(160)]
+        public float posturePerBackstab = 100f;
+
         // ── Quick Presets ─────────────────────────────────────────────────
 
         [TitleGroup("Quick Presets")]
@@ -178,182 +244,6 @@ namespace _Ashfall._Scripts.Gameplay.Player
 #endif
         }
 
-        // ── Health ───────────────────────────────────────────────────────
-
-        [TitleGroup("Health")]
-        [BoxGroup("Health/Box")]
-        [LabelWidth(100)]
-        [Tooltip("Maximum HP")]
-        public float maxHp = 100f;
-
-        // ── Combat Stats ─────────────────────────────────────────────────
-
-        [TitleGroup("Combat Stats")]
-        [BoxGroup("Combat Stats/Box")]
-        [HorizontalGroup("Combat Stats/Box/Row1")]
-
-        [VerticalGroup("Combat Stats/Box/Row1/Left"), LabelWidth(80)]
-        [Tooltip("Physical attack power — scales basic attack damage")]
-        public float atk  = 20f;
-
-        [VerticalGroup("Combat Stats/Box/Row1/Left"), LabelWidth(80)]
-        [Tooltip("Magic attack power — scales magic skill damage")]
-        public float mag  = 10f;
-
-        [VerticalGroup("Combat Stats/Box/Row1/Right"), LabelWidth(80)]
-        [Tooltip("Defense — reduces both Physical and Magic damage received")]
-        public float def  = 10f;
-
-        // ── Attack / Combo ────────────────────────────────────────────────
-
-        [TitleGroup("Attack")]
-        [BoxGroup("Attack/Box")]
-        [HorizontalGroup("Attack/Box/Row1")]
-
-        [VerticalGroup("Attack/Box/Row1/Left"), LabelWidth(140)]
-        [Tooltip("Time window after each hit to queue the next attack (seconds)")]
-        public float comboWindowTime   = 0.8f;
-
-        [VerticalGroup("Attack/Box/Row1/Left"), LabelWidth(140)]
-        [Tooltip("Duration of each attack hit (fallback if no Animator event)")]
-        public float attackDuration    = 0.4f;
-
-        [VerticalGroup("Attack/Box/Row1/Right"), LabelWidth(140)]
-        [Tooltip("How much to slow horizontal movement during an attack [0=stop, 1=full speed]")]
-        [Range(0f, 1f)]
-        public float attackMoveScale   = 0.3f;
-
-        [TitleGroup("Attack")]
-        [BoxGroup("Attack/Box")]
-        [HorizontalGroup("Attack/Box/Row1")]
-
-        [VerticalGroup("Attack/Box/Row1/Left"), LabelWidth(140)]
-        [Tooltip("Total hits in the combo — must match number of Attack states in Animator")]
-        public int comboLength     = 3;
-
-        [TitleGroup("Attack")]
-        [BoxGroup("Attack/ComboData")]
-        [InfoBox("One AttackData SO per combo hit. Index 0 = first hit. Length overrides comboLength.")]
-        [Tooltip("Per-hit AttackData SOs — defines animation, damage, crit, knockback per combo hit")]
-        public AttackData[] comboAttacks;
-
-        /// <summary>
-        /// Combo length — uses comboAttacks array length when assigned, falls back to comboLength field.
-        /// </summary>
-        public int ComboLength => comboAttacks != null && comboAttacks.Length > 0
-            ? comboAttacks.Length
-            : comboLength;
-
-        // ── Posture ───────────────────────────────────────────────────────
-
-        [TitleGroup("Posture")]
-        [BoxGroup("Posture/Box")]
-        [HorizontalGroup("Posture/Box/Row1")]
-
-        [VerticalGroup("Posture/Box/Row1/Left"), LabelWidth(160)]
-        [Tooltip("Maximum posture before stagger")]
-        public float maxPosture            = 100f;
-
-        [VerticalGroup("Posture/Box/Row1/Left"), LabelWidth(160)]
-        [Tooltip("Seconds before posture starts recovering after last hit")]
-        public float postureRecoverDelay   = 2f;
-
-        [VerticalGroup("Posture/Box/Row1/Right"), LabelWidth(160)]
-        [Tooltip("Posture recovered per second")]
-        public float postureRecoverRate    = 15f;
-
-        [VerticalGroup("Posture/Box/Row1/Right"), LabelWidth(160)]
-        [Tooltip("Seconds player has to land finishing blow after stagger")]
-        public float finishingBlowWindow   = 3f;
-
-        [TitleGroup("Posture")]
-        [BoxGroup("Posture/HitValues")]
-        [InfoBox("Posture added per hit type")]
-        [HorizontalGroup("Posture/HitValues/Row")]
-
-        [VerticalGroup("Posture/HitValues/Row/Left"), LabelWidth(160)]
-        public float posturePerHit         = 20f;
-
-        [VerticalGroup("Posture/HitValues/Row/Left"), LabelWidth(160)]
-        public float posturePerParry       = 50f;
-
-        [VerticalGroup("Posture/HitValues/Row/Right"), LabelWidth(160)]
-        public float posturePerBackstab    = 100f;
-
-        // ── Block / Parry ─────────────────────────────────────────────────
-
-        [TitleGroup("Block & Parry")]
-        [BoxGroup("Block & Parry/Box")]
-        [HorizontalGroup("Block & Parry/Box/Row1")]
-
-        [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
-        [Tooltip("Can this class block and parry? (Fighter only for now)")]
-        public bool  canBlock             = false;
-
-        [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
-        [ShowIf("canBlock")]
-        [Tooltip("How much damage is reduced while blocking [0-1]")]
-        [Range(0f, 1f)]
-        public float blockDamageReduction = 0.7f;
-
-        [VerticalGroup("Block & Parry/Box/Row1/Left"), LabelWidth(150)]
-        [Tooltip("Hold duration threshold — under this = parry, over = block (seconds)")]
-        public float parryWindowTime      = 0.3f;
-
-        [VerticalGroup("Block & Parry/Box/Row1/Right"), LabelWidth(150)]
-        [Tooltip("How long the parry active window lasts (seconds)")]
-        public float parryActiveDuration  = 0.3f;
-
-        [TitleGroup("Block & Parry")]
-        [BoxGroup("Block & Parry/ParryClips")]
-        [InfoBox("Drag parry clips here. One is picked randomly each parry.")]
-        [ShowIf("canBlock")]
-        [Tooltip("Parry animation clips — one picked randomly per parry")]
-        public AnimationClip[] parryClips;
-
-        [BoxGroup("Block & Parry/ParryClips")]
-        [ShowIf("canBlock")]
-        [Tooltip("The placeholder clip assigned to the Parry state in Animator — used as override key")]
-        public AnimationClip parryStateClip;
-
-        [VerticalGroup("Block & Parry/Box/Row1/Right"), LabelWidth(150)]
-        [Tooltip("Duration of guard break stagger (seconds)")]
-        public float guardBreakDuration   = 1.5f;
-
-        // ── Stamina ───────────────────────────────────────────────────────
-
-        [TitleGroup("Stamina")]
-        [BoxGroup("Stamina/Box")]
-        [HorizontalGroup("Stamina/Box/Row1")]
-
-        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
-        [Tooltip("Maximum stamina value")]
-        public float maxStamina      = 100f;
-
-        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
-        [Tooltip("Stamina restored per second when not draining")]
-        public float staminaRegenRate = 25f;
-
-        [VerticalGroup("Stamina/Box/Row1/Left"), LabelWidth(130)]
-        [Tooltip("Seconds after last drain before regen starts")]
-        public float staminaRegenDelay = 1.2f;
-
-        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
-        [Tooltip("Stamina cost per dash")]
-        public float dashStaminaCost  = 25f;
-
-        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
-        [Tooltip("Stamina drained per second while sprinting")]
-        public float sprintStaminaDrain = 15f;
-
-        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
-        [Tooltip("Stamina cost per attack")]
-        public float attackStaminaCost = 20f;
-
-        [VerticalGroup("Stamina/Box/Row1/Right"), LabelWidth(130)]
-        [Tooltip("Stamina cost per blocked hit")]
-        public float blockStaminaCost  = 15f;
-
         // ── Validation ────────────────────────────────────────────────────
 
         private void OnValidate()
@@ -373,5 +263,3 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
     }
 }
-
-// NOTE: append vào cuối trước closing brace của class

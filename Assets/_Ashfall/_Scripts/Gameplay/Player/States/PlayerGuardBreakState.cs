@@ -26,7 +26,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void Enter()
         {
-            _timer = _ctx.Stats.guardBreakDuration;
+            _timer = _ctx.Weapon.Current.guardBreakDuration;
 
             // Stop movement
             var v = _ctx.Rb.linearVelocity;
