@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using _Ashfall._Scripts.Gameplay.Combat;
+using _Ashfall._Scripts.Gameplay.Weapons;
 
 namespace _Ashfall._Scripts.Gameplay.Player
 {
@@ -76,6 +77,14 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         /// <summary>Remaining cooldown time in seconds.</summary>
         public float DashCooldownTimer { get; set; }
+
+        // ── Weapon ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Manages the equipped weapon — exposes Current WeaponData and Equip() API.
+        /// States should read combat config via Weapon.Current (combo, block, stamina costs).
+        /// </summary>
+        public WeaponHandler Weapon { get; set; }
 
         // ── Combat ────────────────────────────────────────────────────────
 

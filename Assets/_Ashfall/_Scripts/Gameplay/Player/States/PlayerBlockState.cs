@@ -32,7 +32,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         public void Enter()
         {
             // Open parry window immediately on block
-            _parryWindowTimer  = _ctx.Stats.parryWindowTime;
+            _parryWindowTimer  = _ctx.Weapon.Current.parryWindowTime;
             _isParryWindowOpen = true;
 
             _ctx.AnimMoveSpeed = 0f;
@@ -117,7 +117,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             }
 
             // Normal block
-            bool blocked = _ctx.Stamina.TrySpendBlock();
+            bool blocked = _ctx.Stamina.TrySpend(_ctx.Weapon.Current.blockStaminaCost);
             if (!blocked)
             {
                 _controller.ChangeState(PlayerState.GuardBreak);

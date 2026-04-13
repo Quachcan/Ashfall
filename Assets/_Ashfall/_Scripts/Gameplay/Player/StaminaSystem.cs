@@ -54,9 +54,10 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         // ── Drain API ─────────────────────────────────────────────────────
 
-        public bool TrySpendDash()   => TrySpend(_stats.dashStaminaCost);
-        public bool TrySpendAttack() => TrySpend(_stats.attackStaminaCost);
-        public bool TrySpendBlock()  => TrySpend(_stats.blockStaminaCost);
+        public bool TrySpendDash()          => TrySpendInternal(_stats.dashStaminaCost);
+
+        /// <summary>Spend an explicit amount of stamina. Used for weapon-specific costs.</summary>
+        public bool TrySpend(float cost)    => TrySpendInternal(cost);
 
         /// <summary>
         /// Drain stamina per second for sprint.
@@ -87,7 +88,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         // ── Private ───────────────────────────────────────────────────────
 
-        private bool TrySpend(float cost)
+        private bool TrySpendInternal(float cost)
         {
             if (IsExhausted || Current < cost) return false;
             Drain(cost);
