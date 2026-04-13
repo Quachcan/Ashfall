@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using _Ashfall._Scripts.Gameplay.Combat;
 using _Ashfall._Scripts.Gameplay.Player.States;
+using _Ashfall._Scripts.Gameplay.Weapons;
 using _Ashfall._Scripts.Core.StateMachineCore;
 
 namespace _Ashfall._Scripts.Gameplay.Player
@@ -29,11 +30,11 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         // ── Components ────────────────────────────────────────────────────
 
-        private Rigidbody                  _rb;
-        private CapsuleCollider            _collider;
-        private PlayerInputHandler         _input;
-        private Animator                   _animator;
-        private AnimatorOverrideController _overrideController;
+        private Rigidbody          _rb;
+        private CapsuleCollider    _collider;
+        private PlayerInputHandler _input;
+        private Animator           _animator;
+        private WeaponHandler      _weaponHandler;
 
         // Pure C# systems — ticked manually, no MonoBehaviour Update overhead
         private StaminaSystem      _stamina;
@@ -70,11 +71,12 @@ namespace _Ashfall._Scripts.Gameplay.Player
                             | RigidbodyConstraints.FreezeRotationY
                             | RigidbodyConstraints.FreezeRotationZ;
 
-            // Setup AnimatorOverrideController for random parry clips
-            if (_animator && _animator.runtimeAnimatorController)
+            // WeaponHandler sets up the AnimatorOverrideController — must init before FSM
+            _weaponHandler = GetComponent<WeaponHandler>();
+            if (_weaponHandler == null)
             {
-                _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
-                _animator.runtimeAnimatorController = _overrideController;
+                Debug.LogError("[PlayerController] WeaponHandler component not found!", this);
+                return;
             }
 
             // Create pure C# systems — no MonoBehaviour, ticked manually
@@ -92,9 +94,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
             // Build shared context — must be created before anything reads _ctx
             _ctx = new PlayerContext(_rb, transform, _animator, _input, stats, _collider, _stamina, _health)
                 {
-                    CoyoteTimeDuration = stats.coyoteTime,
-                    // Set class capability flags — after _ctx is created
-                    CanBlock = stats.canBlock
+                    CoyoteTimeDuration = stats.coyoteTime
                 };
 
             // Wire HurtboxController — inject all systems so it can receive hits and react to death/stagger
@@ -103,7 +103,16 @@ namespace _Ashfall._Scripts.Gameplay.Player
             _ctx.Hurtbox = _hurtbox;
 
             // Wire HitboxWeapon — lives on the weapon bone child
-            _ctx.Hitbox = GetComponentInChildren<HitboxWeapon>();
+            var hitbox = GetComponentInChildren<HitboxWeapon>();
+            _ctx.Hitbox = hitbox;
+
+            // Initialize WeaponHandler — swaps animator controller and spawns default weapon model
+            _weaponHandler.Initialize(_animator, hitbox);
+            _ctx.Weapon = _weaponHandler;
+
+            // Sync CanBlock from the default weapon
+            _ctx.CanBlock = _weaponHandler.Current?.canBlock ?? false;
+            _weaponHandler.OnWeaponChanged += w => _ctx.CanBlock = w.canBlock;
 
             // Subscribe to hit events — triggers knockback state on strong hits
             if (_hurtbox != null)
@@ -194,9 +203,9 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         // ── ICombatStats ──────────────────────────────────────────────────
 
-        public float ATK => stats != null ? stats.atk : 0f;
-        public float MAG => stats != null ? stats.mag : 0f;
-        public float DEF => stats != null ? stats.def : 0f;
+        public float ATK => _weaponHandler?.Current?.atk ?? 0f;
+        public float MAG => _weaponHandler?.Current?.mag ?? 0f;
+        public float DEF => _weaponHandler?.Current?.def ?? 0f;
 
 
 
@@ -324,20 +333,24 @@ namespace _Ashfall._Scripts.Gameplay.Player
         }
 
         /// <summary>
-        /// Swaps the Parry state clip with a randomly chosen one from parryClips.
+        /// Swaps the Parry state clip with a randomly chosen one from the current weapon's parryClips.
         /// Called by PlayerParryState before CrossFade.
         /// </summary>
         public void SwapParryClip()
         {
-            var clips     = stats.parryClips;
-            var stateClip = stats.parryStateClip;
+            var weapon     = _weaponHandler?.Current;
+            var overrideCtrl = _weaponHandler?.OverrideController;
 
-            if (clips == null || clips.Length == 0
-                || stateClip == null || _overrideController == null) return;
+            if (weapon == null || overrideCtrl == null) return;
+
+            var clips     = weapon.parryClips;
+            var stateClip = weapon.parryStateClip;
+
+            if (clips == null || clips.Length == 0 || stateClip == null) return;
 
             var randomClip = clips[Random.Range(0, clips.Length)];
             if (randomClip != null)
-                _overrideController[stateClip.name] = randomClip;
+                overrideCtrl[stateClip.name] = randomClip;
         }
 
         /// <summary>

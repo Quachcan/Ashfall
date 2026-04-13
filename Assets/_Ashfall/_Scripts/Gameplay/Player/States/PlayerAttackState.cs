@@ -57,7 +57,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             _nextAttackQueued  = false;
 
             // Spend stamina for first hit
-            _ctx.Stamina.TrySpendAttack();
+            _ctx.Stamina.TrySpend(_ctx.Weapon.Current.attackStaminaCost);
 
             StartHit(_comboIndex);
         }
@@ -78,8 +78,9 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             {
                 _ctx.Input.ConsumeAttack();
 
-                bool canContinue = _comboIndex < _ctx.Stats.ComboLength;
-                bool hasStamina  = _ctx.Stamina.Has(_ctx.Stats.attackStaminaCost);
+                var weapon       = _ctx.Weapon.Current;
+                bool canContinue = _comboIndex < weapon.ComboLength;
+                bool hasStamina  = _ctx.Stamina.Has(weapon.attackStaminaCost);
 
                 if (canContinue && hasStamina)
                     _nextAttackQueued = true;
@@ -128,18 +129,19 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             _hitInProgress = false;
             _attackTimer   = 0f;
 
-            if (_nextAttackQueued && _comboIndex < _ctx.Stats.ComboLength)
+            var weapon = _ctx.Weapon.Current;
+            if (_nextAttackQueued && _comboIndex < weapon.ComboLength)
             {
                 // Advance to next hit
                 _nextAttackQueued = false;
                 _comboIndex++;
-                _ctx.Stamina.TrySpendAttack();
+                _ctx.Stamina.TrySpend(weapon.attackStaminaCost);
                 StartHit(_comboIndex);
             }
             else
             {
                 // No queued input — open combo window and wait
-                _comboWindowTimer = _ctx.Stats.comboWindowTime;
+                _comboWindowTimer = weapon.comboWindowTime;
             }
         }
 
@@ -147,14 +149,16 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         private void StartHit(int index)
         {
+            var weapon = _ctx.Weapon.Current;
+
             _hitInProgress    = true;
             _nextAttackQueued = false;
-            _attackTimer      = _ctx.Stats.attackDuration;
+            _attackTimer      = weapon.attackDuration;
 
             if (_ctx.Animator == null) return;
-            if (index <= 0 || index > _ctx.Stats.ComboLength) return;
+            if (index <= 0 || index > weapon.ComboLength) return;
 
-            var attacks = _ctx.Stats.comboAttacks;
+            var attacks = weapon.comboAttacks;
             AttackData data = attacks != null && attacks.Length >= index ? attacks[index - 1] : null;
 
             // Push current hit's AttackData to the hitbox before the swing opens
@@ -179,7 +183,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Slow movement during attack — not completely stopped
             // so the player still has some control feel
             float input   = _ctx.Input.MoveX;
-            float targetX = input * _ctx.Stats.moveSpeed * _ctx.Stats.attackMoveScale;
+            float targetX = input * _ctx.Stats.moveSpeed * _ctx.Weapon.Current.attackMoveScale;
             float current = _ctx.Rb.linearVelocity.x;
 
             float newX = Mathf.MoveTowards(current, targetX,
