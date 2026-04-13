@@ -161,9 +161,21 @@ namespace _Ashfall._Scripts.Gameplay.Combat
 
             var col = GetComponent<Collider>();
             if (col is SphereCollider sc)
-                Gizmos.DrawWireSphere(sc.transform.TransformPoint(sc.center), sc.radius);
+            {
+                // Sphere has no rotation — world-space center + scaled radius is enough
+                Vector3 center = sc.transform.TransformPoint(sc.center);
+                float   radius = sc.radius * sc.transform.lossyScale.x;
+                Gizmos.DrawWireSphere(center, radius);
+            }
             else if (col is BoxCollider bc)
-                Gizmos.DrawWireCube(bc.transform.TransformPoint(bc.center), bc.size);
+            {
+                // Must apply the transform matrix so the cube rotates with the object.
+                // DrawWireCube is always axis-aligned in world space without this.
+                var prev = Gizmos.matrix;
+                Gizmos.matrix = bc.transform.localToWorldMatrix;
+                Gizmos.DrawWireCube(bc.center, bc.size);
+                Gizmos.matrix = prev;
+            }
         }
     }
 }

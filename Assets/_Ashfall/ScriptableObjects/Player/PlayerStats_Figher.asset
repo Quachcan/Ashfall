@@ -40,26 +40,16 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   wallCheckDistance: 0.8
-  comboWindowTime: 1
-  attackDuration: 0.5
-  attackMoveScale: 0
-  comboLength: 4
-  canBlock: 1
-  blockDamageReduction: 1
-  parryWindowTime: 0.3
-  parryActiveDuration: 0.3
-  parryClips:
-  - {fileID: 7400000, guid: b771788c9a2767549969d65d2b13240d, type: 2}
-  - {fileID: 7400000, guid: f88bd43ddb0f023499bd4cc691ff7ae6, type: 2}
-  - {fileID: 7400000, guid: aba26e74a8db9c64d8709c563b9f3439, type: 2}
-  - {fileID: 7400000, guid: a138d129dc9c3d24c8e5cc6b39c7c4e5, type: 2}
-  - {fileID: 7400000, guid: 6b1b47b0c58890345b0dbf2bd95d685a, type: 2}
-  parryStateClip: {fileID: 7400000, guid: b771788c9a2767549969d65d2b13240d, type: 2}
-  guardBreakDuration: 1.5
-  maxStamina: 100
+  maxHp: 100
+  maxStamina: 5000
   staminaRegenRate: 20
   staminaRegenDelay: 0.5
   dashStaminaCost: 25
   sprintStaminaDrain: 15
-  attackStaminaCost: 10
-  blockStaminaCost: 15
+  maxPosture: 100
+  postureRecoverDelay: 2
+  postureRecoverRate: 15
+  finishingBlowWindow: 3
+  posturePerHit: 20
+  posturePerParry: 50
+  posturePerBackstab: 100

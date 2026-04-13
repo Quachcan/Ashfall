@@ -8,7 +8,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
     /// This state is purely visual — the parry detection logic lives in BlockState.
     ///
     /// Flow:
-    ///   BlockState detects hit during parry window
+    ///   BlockState detects hit during the parry window
     ///   → ChangeState(Parry)
     ///   → SwapParryClip (random) + CrossFade
     ///   → Animator Event OnParryWindowOpen (optional — for future counter-attack)
@@ -19,12 +19,12 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
         private readonly PlayerController _controller;
         private readonly PlayerContext    _ctx;
 
-        private static readonly int ParryStateHash = AnimHash.ParryState;
+        private static readonly int _parryStateHash = AnimHash.ParryState;
 
         private GameObject _attacker;
         private bool       _windowOpen;
         private float      _exitTimer;
-        private const float ExitNormalizedTime = 0.85f; // exit at 85% of animation
+        private const float EXIT_NORMALIZED_TIME = 0.85f; // exit at 85% of animation
 
         public PlayerParryState(PlayerController controller, PlayerContext ctx)
         {
@@ -46,7 +46,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
             // Swap to random parry clip then play
             _controller.SwapParryClip();
-            _ctx.Animator?.CrossFade(ParryStateHash, 0.05f, 0);
+            _ctx.Animator?.CrossFade(_parryStateHash, 0.05f, 0);
 
             // TODO: raise EventHub — parry VFX, SFX, optional slow-motion
             // _eventHub.playerEvents.onPlayerParried.Raise();
@@ -62,7 +62,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // More reliable than Animation Events on SO clips
             var stateInfo = _ctx.Animator.GetCurrentAnimatorStateInfo(0);
             if (stateInfo.shortNameHash == AnimHash.ParryState
-                && stateInfo.normalizedTime >= ExitNormalizedTime)
+                && stateInfo.normalizedTime >= EXIT_NORMALIZED_TIME)
             {
                 _controller.ChangeState(PlayerState.Idle);
             }

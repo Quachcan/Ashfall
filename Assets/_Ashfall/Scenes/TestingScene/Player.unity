@@ -3072,73 +3072,6 @@ CapsuleCollider:
   m_Height: 0.6
   m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &326271150
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 326271151}
-  - component: {fileID: 326271153}
-  - component: {fileID: 326271152}
-  m_Layer: 9
-  m_Name: HurtBox_Block
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &326271151
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 326271150}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3446278421355054607}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &326271152
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 326271150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4456fb89806c418a838eaad5ca8c027d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxZone
-  zoneType: 3
---- !u!65 &326271153
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 326271150}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.108082734, y: 0.055854544, z: 1.3999926}
-  m_Center: {x: 0.9188109, y: 1.5721749, z: 0.5254554}
 --- !u!1 &333552037
 GameObject:
   m_ObjectHideFlags: 0
@@ -3502,6 +3435,7 @@ GameObject:
   - component: {fileID: 714634102}
   - component: {fileID: 714634100}
   - component: {fileID: 714634108}
+  - component: {fileID: 714634109}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -3677,7 +3611,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a35ce6bbb95454cbb5e493771aa1875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxController
-  blockZone: {fileID: 326271152}
+  blockZone: {fileID: 0}
+--- !u!114 &714634109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714634098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1765fe58d47e2564f897b3aefa908db0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Weapons.WeaponHandler
+  defaultWeapon: {fileID: 11400000, guid: 2f6e2f8122e1a754bbb2f24fecba9cd5, type: 2}
+  visualRegistry: {fileID: 11400000, guid: 3bc2131c588345a4abe4867b518a0b5c, type: 2}
+  weaponSocket: {fileID: 8221611949496830507}
 --- !u!1 &757892342
 GameObject:
   m_ObjectHideFlags: 0
@@ -3805,59 +3754,6 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
---- !u!1 &861054000
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 861054001}
-  - component: {fileID: 861054002}
-  m_Layer: 11
-  m_Name: HitBoxWeapon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &861054001
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 861054000}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3446278421355054607}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &861054002
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 861054000}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.108082734, y: 0.055854544, z: 1.3999926}
-  m_Center: {x: 0.9188109, y: 1.5721749, z: 0.5254554}
 --- !u!1 &950230619
 GameObject:
   m_ObjectHideFlags: 0
@@ -4148,7 +4044,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 78
+  m_Constraints: 94
   m_CollisionDetection: 0
 --- !u!114 &1924629923
 MonoBehaviour:
@@ -4162,7 +4058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a35ce6bbb95454cbb5e493771aa1875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxController
-  blockZone: {fileID: 326271152}
+  blockZone: {fileID: 0}
 --- !u!114 &1924629924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4773,6 +4669,26 @@ Transform:
   - {fileID: 8474678924986353162}
   m_Father: {fileID: 7318176736191572592}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &714591856240086164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5086733431329275969}
+  - component: {fileID: 976501999218652270}
+  - component: {fileID: 1074451327876574576}
+  - component: {fileID: 5086733431329275971}
+  - component: {fileID: 5086733431329275970}
+  m_Layer: 0
+  m_Name: SwordBasic_B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &748325769773915257
 GameObject:
   m_ObjectHideFlags: 0
@@ -5083,6 +4999,14 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!33 &976501999218652270
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714591856240086164}
+  m_Mesh: {fileID: -8256486476392164007, guid: b94e8070e4ed70b45b0afd1084496a8d, type: 3}
 --- !u!4 &977060283702954752
 Transform:
   m_ObjectHideFlags: 0
@@ -5337,6 +5261,55 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!23 &1074451327876574576
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714591856240086164}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: f2ee7d2ed1f424a47a67bd0dbe5ceb84, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &1078895089612633805
 Transform:
   m_ObjectHideFlags: 0
@@ -8358,23 +8331,6 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.3283898, y: 0.10372013, z: 0}
     m_Extent: {x: 0.15555164, y: 0.090366736, z: 0.11553392}
   m_DirtyAABB: 0
---- !u!4 &3446278421355054607
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7753781141217260721}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 0.0000000030797342, z: 0.7071068, w: -0.0000000030797342}
-  m_LocalPosition: {x: -0.005884444, y: 1.5616701, z: 0.9210979}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 861054001}
-  - {fileID: 326271151}
-  m_Father: {fileID: 8221611949496830507}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3464568060931720171
 GameObject:
   m_ObjectHideFlags: 0
@@ -10573,6 +10529,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7138861241583707754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &5086733431329275969
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714591856240086164}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8221611949496830507}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+--- !u!65 &5086733431329275970
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714591856240086164}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.1, y: 0.055854492, z: 1.0597955}
+  m_Center: {x: -0.000000074505806, y: 0, z: 0.701438}
+--- !u!114 &5086733431329275971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714591856240086164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36da315be7da44279f59da1d0514a8f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HitboxWeapon
+  attackData: {fileID: 0}
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!4 &5162446295256725026
 Transform:
   m_ObjectHideFlags: 0
@@ -13613,25 +13621,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &7753781141217260721
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3446278421355054607}
-  - component: {fileID: 8926807636292527187}
-  - component: {fileID: 8926807636292527188}
-  - component: {fileID: 8926807636292527189}
-  m_Layer: 11
-  m_Name: M_Fighter_Sword
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &7758631813513237768
 GameObject:
   m_ObjectHideFlags: 0
@@ -14082,7 +14071,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3446278421355054607}
+  - {fileID: 5086733431329275969}
   m_Father: {fileID: 3803360314006892451}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8231547509690305781
@@ -15073,121 +15062,6 @@ Transform:
   - {fileID: 1078895089612633805}
   m_Father: {fileID: 1234774660231256724}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!137 &8926807636292527187
-SkinnedMeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7753781141217260721}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 3
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: f2ee7d2ed1f424a47a67bd0dbe5ceb84, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  serializedVersion: 2
-  m_Quality: 0
-  m_UpdateWhenOffscreen: 0
-  m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: 2244125957295098377, guid: e84e161763bdec34587b7e34b3cb0595, type: 3}
-  m_Bones:
-  - {fileID: 4105877439042576792}
-  - {fileID: 3803360314006892451}
-  - {fileID: 5670578169546727364}
-  - {fileID: 8688099041572271587}
-  - {fileID: 7126494591551657864}
-  - {fileID: 8221611949496830507}
-  - {fileID: 1463448121340234785}
-  - {fileID: 4487361907558074587}
-  - {fileID: 4567745161270063556}
-  - {fileID: 6380893428631980787}
-  - {fileID: 8085892944311541782}
-  - {fileID: 653824094731389752}
-  - {fileID: 6515970796948375392}
-  - {fileID: 7114569838685824896}
-  - {fileID: 7377430742512977193}
-  - {fileID: 3226125992939015379}
-  - {fileID: 7210726700876837704}
-  - {fileID: 7601057212802027037}
-  m_BlendShapeWeights: []
-  m_RootBone: {fileID: 4105877439042576792}
-  m_AABB:
-    m_Center: {x: -0.5800309, y: 0.000015540048, z: -0.38563886}
-    m_Extent: {x: 0.69999623, y: 0.02792724, z: 0.12550876}
-  m_DirtyAABB: 0
---- !u!114 &8926807636292527188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7753781141217260721}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36da315be7da44279f59da1d0514a8f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HitboxWeapon
-  attackData: {fileID: 0}
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 1024
---- !u!65 &8926807636292527189
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7753781141217260721}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.108082734, y: 0.055854544, z: 1.3999926}
-  m_Center: {x: 0.9188109, y: 1.5721749, z: 0.5254554}
 --- !u!1 &8927777208269874251
 GameObject:
   m_ObjectHideFlags: 0
