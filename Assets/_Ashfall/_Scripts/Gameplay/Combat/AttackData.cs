@@ -34,8 +34,19 @@ namespace _Ashfall._Scripts.Gameplay.Combat
         // ── Animation ─────────────────────────────────────────────────────
 
         [TitleGroup("Animation")]
+        [HorizontalGroup("Animation/Row")]
+
+        [VerticalGroup("Animation/Row/Left"), LabelWidth(130)]
         [Tooltip("Tên state trong Animator — dùng với CrossFade (VD: \"Attack_1\", \"Attack_Heavy\")")]
         public string animStateName = "Attack_1";
+
+        [VerticalGroup("Animation/Row/Left"), LabelWidth(130)]
+        [Tooltip("Độ dài clip (giây) — fallback timer nếu Animator Event chưa được wire")]
+        public float attackDuration = 0.4f;
+
+        [VerticalGroup("Animation/Row/Right"), LabelWidth(130)]
+        [Tooltip("Thời gian chờ sau khi hit kết thúc để nhận input combo tiếp theo (giây)")]
+        public float comboWindowTime = 0.8f;
 
         // ── Damage ────────────────────────────────────────────────────────
 
