@@ -6,19 +6,27 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
 {
     /// <summary>
     /// Manages the player's equipped weapon.
-    /// Handles equip/unequip logic: swaps AnimatorController, spawns the weapon model,
-    /// and exposes the current WeaponData to all other systems.
     ///
-    /// Owned by PlayerController — call Initialize() in Awake after the Animator is ready.
-    /// Equip a weapon via Equip(WeaponData). Subscribe to OnWeaponChanged for reactions.
+    /// Separation of concerns:
+    ///   WeaponData    — combat numbers (always in memory, zero visual assets)
+    ///   WeaponVisuals — prefab + animator + animations (resolved on equip via registry)
+    ///
+    /// Flow:
+    ///   1. PlayerController calls Initialize() in Awake.
+    ///   2. WeaponHandler equips defaultWeapon, resolves its WeaponVisuals from the registry.
+    ///   3. Callers invoke Equip(WeaponData) at runtime — visuals resolve automatically.
+    ///   4. OnWeaponChanged fires so other systems (HUD, audio) can react.
     /// </summary>
     public class WeaponHandler : MonoBehaviour
     {
         // ── Inspector ─────────────────────────────────────────────────────
 
         [Header("Config")]
-        [Tooltip("Weapon equipped at game start")]
+        [Tooltip("Weapon data equipped at game start")]
         [SerializeField] private WeaponData defaultWeapon;
+
+        [Tooltip("Maps WeaponType → WeaponVisuals. Assign the WeaponVisualRegistry SO here.")]
+        [SerializeField] private WeaponVisualRegistry visualRegistry;
 
         [Header("Sockets")]
         [Tooltip("Transform where the weapon model is parented (e.g. right hand bone)")]
@@ -26,24 +34,27 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
 
         // ── Runtime ───────────────────────────────────────────────────────
 
-        /// <summary>Currently equipped weapon. Null until Initialize() is called.</summary>
+        /// <summary>Currently equipped weapon data (combat stats, combo, block).</summary>
         public WeaponData Current { get; private set; }
 
-        /// <summary>The AnimatorOverrideController created for the current weapon's animator.</summary>
+        /// <summary>Visual assets for the currently equipped weapon.</summary>
+        public WeaponVisuals CurrentVisuals { get; private set; }
+
+        /// <summary>AnimatorOverrideController built from CurrentVisuals.animatorController.</summary>
         public AnimatorOverrideController OverrideController { get; private set; }
 
-        /// <summary>Fired when a new weapon is equipped. Arg = new weapon.</summary>
+        /// <summary>Fired after a new weapon is fully equipped. Arg = new WeaponData.</summary>
         public event Action<WeaponData> OnWeaponChanged;
 
-        private Animator       _animator;
-        private HitboxWeapon   _hitbox;
-        private GameObject     _weaponModelInstance;
+        private Animator     _animator;
+        private HitboxWeapon _hitbox;
+        private GameObject   _weaponModelInstance;
 
         // ── Initialization ────────────────────────────────────────────────
 
         /// <summary>
-        /// Must be called by PlayerController.Awake() after the Animator is resolved.
-        /// Equips the default weapon without firing OnWeaponChanged.
+        /// Called by PlayerController.Awake() once the Animator is resolved.
+        /// Equips the default weapon silently (no OnWeaponChanged fired).
         /// </summary>
         public void Initialize(Animator animator, HitboxWeapon hitbox)
         {
@@ -59,9 +70,9 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         // ── Public API ────────────────────────────────────────────────────
 
         /// <summary>
-        /// Equip a new weapon at runtime.
-        /// Swaps the Animator controller, spawns new weapon model, fires OnWeaponChanged.
-        /// No-op if the weapon is already equipped.
+        /// Equip a weapon at runtime.
+        /// Resolves the matching WeaponVisuals from the registry automatically.
+        /// No-op if the same weapon is already equipped.
         /// </summary>
         public void Equip(WeaponData weapon)
         {
@@ -73,18 +84,25 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
 
         private void EquipInternal(WeaponData weapon, bool fireEvent)
         {
-            Current = weapon;
-            SwapAnimator(weapon);
-            SwapModel(weapon);
+            Current        = weapon;
+            CurrentVisuals = visualRegistry != null
+                ? visualRegistry.Get(weapon.weaponType)
+                : null;
+
+            if (CurrentVisuals == null)
+                Debug.LogWarning($"[WeaponHandler] No WeaponVisuals found for {weapon.weaponType}. Model and animator will not update.", this);
+
+            SwapAnimator();
+            SwapModel();
+
             if (fireEvent) OnWeaponChanged?.Invoke(weapon);
         }
 
-        private void SwapAnimator(WeaponData weapon)
+        private void SwapAnimator()
         {
             if (!_animator) return;
 
-            // Use weapon's controller if provided; fall back to current runtime controller
-            var baseController = weapon.animatorController
+            var baseController = CurrentVisuals?.animatorController
                               ?? _animator.runtimeAnimatorController;
 
             if (baseController == null) return;
@@ -93,15 +111,15 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
             _animator.runtimeAnimatorController = OverrideController;
         }
 
-        private void SwapModel(WeaponData weapon)
+        private void SwapModel()
         {
             if (_weaponModelInstance)
                 Destroy(_weaponModelInstance);
 
-            if (weapon.weaponPrefab && weaponSocket)
+            if (CurrentVisuals?.weaponPrefab != null && weaponSocket != null)
             {
                 _weaponModelInstance = Instantiate(
-                    weapon.weaponPrefab,
+                    CurrentVisuals.weaponPrefab,
                     weaponSocket.position,
                     weaponSocket.rotation,
                     weaponSocket);

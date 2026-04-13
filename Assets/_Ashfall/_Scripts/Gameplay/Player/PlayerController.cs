@@ -338,13 +338,13 @@ namespace _Ashfall._Scripts.Gameplay.Player
         /// </summary>
         public void SwapParryClip()
         {
-            var weapon     = _weaponHandler?.Current;
+            var visuals      = _weaponHandler?.CurrentVisuals;
             var overrideCtrl = _weaponHandler?.OverrideController;
 
-            if (weapon == null || overrideCtrl == null) return;
+            if (visuals == null || overrideCtrl == null) return;
 
-            var clips     = weapon.parryClips;
-            var stateClip = weapon.parryStateClip;
+            var clips     = visuals.parryClips;
+            var stateClip = visuals.parryStateClip;
 
             if (clips == null || clips.Length == 0 || stateClip == null) return;
 
