@@ -101,6 +101,17 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             {
                 // Between hits — tick combo window
                 _comboWindowTimer -= Time.deltaTime;
+
+                if (_nextAttackQueued)
+                {
+                    var weapon = _ctx.Weapon.Current;
+                    _nextAttackQueued = false;
+                    _comboIndex++;
+                    _ctx.Stamina.TrySpend(weapon.attackStaminaCost);
+                    StartHit(_comboIndex);
+                    return;
+                }
+                
                 if (_comboWindowTimer <= 0f)
                     EndCombo(); // window expired, no input
             }
