@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using _Ashfall._Scripts.Gameplay.Combat;
 
 namespace _Ashfall._Scripts.Gameplay.Weapons
 {
@@ -46,9 +45,8 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         /// <summary>Fired after a new weapon is fully equipped. Arg = new WeaponData.</summary>
         public event Action<WeaponData> OnWeaponChanged;
 
-        private Animator     _animator;
-        private HitboxWeapon _hitbox;
-        private GameObject   _weaponModelInstance;
+        private Animator   _animator;
+        private GameObject _weaponModelInstance;
 
         // ── Initialization ────────────────────────────────────────────────
 
@@ -56,10 +54,9 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         /// Called by PlayerController.Awake() once the Animator is resolved.
         /// Equips the default weapon silently (no OnWeaponChanged fired).
         /// </summary>
-        public void Initialize(Animator animator, HitboxWeapon hitbox)
+        public void Initialize(Animator animator)
         {
             _animator = animator;
-            _hitbox   = hitbox;
 
             if (defaultWeapon != null)
                 EquipInternal(defaultWeapon, fireEvent: false);
@@ -109,6 +106,12 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
 
             OverrideController = new AnimatorOverrideController(baseController);
             _animator.runtimeAnimatorController = OverrideController;
+        }
+
+        private void OnDestroy()
+        {
+            if (_weaponModelInstance)
+                Destroy(_weaponModelInstance);
         }
 
         private void SwapModel()

@@ -48,6 +48,10 @@ namespace _Ashfall._Scripts.Gameplay.Combat
         [Tooltip("Thời gian chờ sau khi hit kết thúc để nhận input combo tiếp theo (giây)")]
         public float comboWindowTime = 0.8f;
 
+        [VerticalGroup("Animation/Row/Right"), LabelWidth(130), Range(0f, 1f)]
+        [Tooltip("Hệ số tốc độ di chuyển trong khi đánh đòn này [0 = đứng yên, 1 = tốc độ đầy]")]
+        public float attackMoveScale = 0.3f;
+
         // ── Damage ────────────────────────────────────────────────────────
 
         [TitleGroup("Damage")]

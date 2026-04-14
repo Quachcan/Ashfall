@@ -107,7 +107,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
             _ctx.Hitbox = hitbox;
 
             // Initialize WeaponHandler — swaps animator controller and spawns default weapon model
-            _weaponHandler.Initialize(_animator, hitbox);
+            _weaponHandler.Initialize(_animator);
             _ctx.Weapon = _weaponHandler;
 
             // Sync CanBlock from the default weapon

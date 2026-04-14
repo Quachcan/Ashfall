@@ -55,6 +55,13 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         public void Enter()
         {
+            if (_ctx.Weapon?.Current == null)
+            {
+                Debug.LogError("[PlayerAttackState] No weapon equipped — cannot attack.", _ctx.Rb);
+                _controller.ChangeState(PlayerState.Idle);
+                return;
+            }
+
             // Always start or re-enter at index 1
             _comboIndex        = 1;
             _nextAttackQueued  = false;
@@ -82,7 +89,9 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             {
                 _ctx.Input.ConsumeAttack();
 
-                var weapon       = _ctx.Weapon.Current;
+                var weapon = _ctx.Weapon?.Current;
+                if (weapon == null) { EndCombo(); return; }
+
                 bool canContinue = _comboIndex < weapon.ComboLength;
                 bool hasStamina  = _ctx.Stamina.Has(weapon.attackStaminaCost);
 
@@ -104,7 +113,8 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
                 if (_nextAttackQueued)
                 {
-                    var weapon = _ctx.Weapon.Current;
+                    var weapon = _ctx.Weapon?.Current;
+                    if (weapon == null) { EndCombo(); return; }
                     _nextAttackQueued = false;
                     _comboIndex++;
                     _ctx.Stamina.TrySpend(weapon.attackStaminaCost);
@@ -144,7 +154,9 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             _hitInProgress = false;
             _attackTimer   = 0f;
 
-            var weapon = _ctx.Weapon.Current;
+            var weapon = _ctx.Weapon?.Current;
+            if (weapon == null) { _hitInProgress = false; EndCombo(); return; }
+
             if (_nextAttackQueued && _comboIndex < weapon.ComboLength)
             {
                 // Advance to next hit
@@ -164,7 +176,8 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
 
         private void StartHit(int index)
         {
-            var weapon = _ctx.Weapon.Current;
+            var weapon = _ctx.Weapon?.Current;
+            if (weapon == null) { EndCombo(); return; }
 
             _hitInProgress    = true;
             _nextAttackQueued = false;
@@ -201,7 +214,7 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
             // Slow movement during attack — not completely stopped
             // so the player still has some control feel
             float input   = _ctx.Input.MoveX;
-            float targetX = input * _ctx.Stats.moveSpeed * _ctx.Weapon.Current.attackMoveScale;
+            float targetX = input * _ctx.Stats.moveSpeed * (_currentAttackData?.attackMoveScale ?? 0.3f);
             float current = _ctx.Rb.linearVelocity.x;
 
             float newX = Mathf.MoveTowards(current, targetX,
