@@ -53,14 +53,6 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         // ── Combat Config ─────────────────────────────────────────────────
 
         [TitleGroup("Combat")]
-        [BoxGroup("Combat/Combo")]
-        [HorizontalGroup("Combat/Combo/Row")]
-
-        [VerticalGroup("Combat/Combo/Row/Left"), LabelWidth(150), Range(0f, 1f)]
-        [Tooltip("Movement speed scale during an attack [0 = stop, 1 = full speed]")]
-        public float attackMoveScale = 0.3f;
-
-        [TitleGroup("Combat")]
         [BoxGroup("Combat/ComboData")]
         [InfoBox("One AttackData SO per combo hit. Index 0 = first hit.")]
         [Tooltip("Per-hit AttackData SOs — animation, damage, crit, knockback per combo hit")]
