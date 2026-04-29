@@ -11,6 +11,7 @@
         Fall,
         Dash,
         Attack,
+        BowAttack,
         CrouchIdle,
         CrouchWalk,
         Block,

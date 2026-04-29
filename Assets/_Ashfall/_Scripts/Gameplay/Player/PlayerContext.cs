@@ -97,6 +97,9 @@ namespace _Ashfall._Scripts.Gameplay.Player
         /// <summary>Duration passed from the hit that triggered knockback — read by PlayerKnockbackState.</summary>
         public float PendingKnockbackDuration { get; set; }
 
+        /// <summary>World-space spawn point for bow arrows — child Transform near the bow hand. Set by PlayerController.</summary>
+        public Transform ArrowSpawnPoint { get; set; }
+
         // ── Constructor ───────────────────────────────────────────────────
 
         public PlayerContext(

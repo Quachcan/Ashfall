@@ -61,6 +61,17 @@ namespace _Ashfall._Scripts.Gameplay.Player
         /// <summary>Parry state hash — used with CrossFade in PlayerParryState.</summary>
         public static readonly int ParryState   = Animator.StringToHash("Parry");
 
+        // ── Bow ───────────────────────────────────────────────────────────
+
+        /// <summary>Float [0,1] — drives bow draw blend tree (0 = not drawn, 1 = fully drawn).</summary>
+        public static readonly int BowChargeProgress = Animator.StringToHash("BowChargeProgress");
+
+        /// <summary>State hash for the bow draw animation — used with CrossFade.</summary>
+        public static readonly int BowDrawState      = Animator.StringToHash("Bow_Draw");
+
+        /// <summary>State hash for the bow release/fire animation — used with CrossFade.</summary>
+        public static readonly int BowReleaseState   = Animator.StringToHash("Bow_Release");
+
         // ── Dynamic Helpers ───────────────────────────────────────────────
 
         /// <summary>

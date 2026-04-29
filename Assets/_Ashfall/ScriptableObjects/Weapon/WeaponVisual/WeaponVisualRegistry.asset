@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: WeaponVisualRegistry
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Weapons.WeaponVisualRegistry
   entries:
+  - {fileID: 11400000, guid: 2a6b782629d1fbf41a926b6bca877dd3, type: 2}
   - {fileID: 11400000, guid: ff259525d5ba87f40b17112d7382e147, type: 2}
+  - {fileID: 11400000, guid: da019784adb52704ea1f24c516f12433, type: 2}

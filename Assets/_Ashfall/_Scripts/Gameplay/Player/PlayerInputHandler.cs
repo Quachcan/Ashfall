@@ -49,6 +49,12 @@ namespace _Ashfall._Scripts.Gameplay.Player
         /// <summary>True for one frame when Attack is pressed. Consumed by AttackState.</summary>
         public bool AttackPressed { get; private set; }
 
+        /// <summary>True while Attack button is physically held (used by BowAttackState for charge).</summary>
+        public bool AttackHeld { get; private set; }
+
+        /// <summary>True for one frame when Attack button is released. Used by BowAttackState to fire.</summary>
+        public bool AttackReleased { get; private set; }
+
         // ── Block / Parry ─────────────────────────────────────────────────
 
         /// <summary>True while Block button is physically held.</summary>
@@ -110,26 +116,28 @@ namespace _Ashfall._Scripts.Gameplay.Player
 
         private void OnEnable()
         {
-            _jumpAction.performed   += OnJumpPerformed;
-            _jumpAction.canceled    += OnJumpCanceled;
-            _dashAction.performed   += OnDashPerformed;
-            _dashAction.canceled    += OnDashCanceled;
-            _attackAction.performed += OnAttackPerformed;
-            _crouchAction.performed += OnCrouchPerformed;
-            _blockAction.performed  += OnBlockPerformed;
-            _blockAction.canceled   += OnBlockCanceled;
+            _jumpAction.performed    += OnJumpPerformed;
+            _jumpAction.canceled     += OnJumpCanceled;
+            _dashAction.performed    += OnDashPerformed;
+            _dashAction.canceled     += OnDashCanceled;
+            _attackAction.performed  += OnAttackPerformed;
+            _attackAction.canceled   += OnAttackCanceled;
+            _crouchAction.performed  += OnCrouchPerformed;
+            _blockAction.performed   += OnBlockPerformed;
+            _blockAction.canceled    += OnBlockCanceled;
         }
 
         private void OnDisable()
         {
-            _jumpAction.performed   -= OnJumpPerformed;
-            _jumpAction.canceled    -= OnJumpCanceled;
-            _dashAction.performed   -= OnDashPerformed;
-            _dashAction.canceled    -= OnDashCanceled;
-            _attackAction.performed -= OnAttackPerformed;
-            _crouchAction.performed -= OnCrouchPerformed;
-            _blockAction.performed  -= OnBlockPerformed;
-            _blockAction.canceled   -= OnBlockCanceled;
+            _jumpAction.performed    -= OnJumpPerformed;
+            _jumpAction.canceled     -= OnJumpCanceled;
+            _dashAction.performed    -= OnDashPerformed;
+            _dashAction.canceled     -= OnDashCanceled;
+            _attackAction.performed  -= OnAttackPerformed;
+            _attackAction.canceled   -= OnAttackCanceled;
+            _crouchAction.performed  -= OnCrouchPerformed;
+            _blockAction.performed   -= OnBlockPerformed;
+            _blockAction.canceled    -= OnBlockCanceled;
         }
 
         private void Update()
@@ -145,8 +153,9 @@ namespace _Ashfall._Scripts.Gameplay.Player
             }
 
             // Clear one-frame flags
-            BlockPressed  = false;
-            BlockReleased = false;
+            BlockPressed   = false;
+            BlockReleased  = false;
+            AttackReleased = false;
         }
 
         private void LateUpdate()
@@ -170,7 +179,10 @@ namespace _Ashfall._Scripts.Gameplay.Player
         public void ConsumeSprint()  => SprintHeld     = false;
 
         /// <summary>Consume AttackPressed flag.</summary>
-        public void ConsumeAttack()  => AttackPressed  = false;
+        public void ConsumeAttack()         => AttackPressed  = false;
+
+        /// <summary>Consume AttackReleased flag (used by BowAttackState after arrow fires).</summary>
+        public void ConsumeAttackRelease()  => AttackReleased = false;
 
         /// <summary>Consume CrouchToggled flag (keep IsCrouching state).</summary>
         public void ConsumeCrouch()  => CrouchToggled  = false;
@@ -219,7 +231,17 @@ namespace _Ashfall._Scripts.Gameplay.Player
             SprintHeld = false;
         }
 
-        private void OnAttackPerformed(InputAction.CallbackContext ctx) => AttackPressed = true;
+        private void OnAttackPerformed(InputAction.CallbackContext ctx)
+        {
+            AttackPressed = true;
+            AttackHeld    = true;
+        }
+
+        private void OnAttackCanceled(InputAction.CallbackContext ctx)
+        {
+            AttackHeld     = false;
+            AttackReleased = true;
+        }
 
         private void OnCrouchPerformed(InputAction.CallbackContext ctx)
         {

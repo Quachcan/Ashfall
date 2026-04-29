@@ -24,6 +24,10 @@ namespace _Ashfall._Scripts.Gameplay.Player
         [Tooltip("ScriptableObject asset for this class (e.g. FighterStats, MageStats)")]
         [SerializeField] private PlayerStats stats;
 
+        [Header("Bow")]
+        [Tooltip("Child Transform trên prefab player — vị trí spawn mũi tên (gần tay cầm cung)")]
+        [SerializeField] private Transform arrowSpawnPoint;
+
         [Header("Debug")]
         [SerializeField] private bool showGroundGizmo = true;
         [SerializeField] private bool showWallGizmo   = true;
@@ -106,6 +110,9 @@ namespace _Ashfall._Scripts.Gameplay.Player
             var hitbox = GetComponentInChildren<HitboxWeapon>();
             _ctx.Hitbox = hitbox;
 
+            // Wire arrow spawn point for bow attacks
+            _ctx.ArrowSpawnPoint = arrowSpawnPoint;
+
             // Initialize WeaponHandler — swaps animator controller and spawns default weapon model
             _weaponHandler.Initialize(_animator);
             _ctx.Weapon = _weaponHandler;
@@ -158,6 +165,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
                 { PlayerState.Fall,       new PlayerFallState(this, _ctx)       },
                 { PlayerState.Dash,       new PlayerDashState(this, _ctx)       },
                 { PlayerState.Attack,     new PlayerAttackState(this, _ctx)     },
+                { PlayerState.BowAttack,  new PlayerBowAttackState(this, _ctx)  },
                 { PlayerState.CrouchIdle, new PlayerCrouchIdleState(this, _ctx) },
                 { PlayerState.CrouchWalk,  new PlayerCrouchWalkState(this, _ctx)  },
                 { PlayerState.Block,       new PlayerBlockState(this, _ctx)       },
@@ -316,6 +324,14 @@ namespace _Ashfall._Scripts.Gameplay.Player
             if (_fsm.CurrentState == PlayerState.Attack &&
                 _states.TryGetValue(PlayerState.Attack, out var state))
                 ((PlayerAttackState)state).OnAttackEnd();
+        }
+
+        /// <summary>Called by Animator event on the Bow_Release clip at the arrow release frame.</summary>
+        public void OnBowRelease()
+        {
+            if (_fsm.CurrentState == PlayerState.BowAttack &&
+                _states.TryGetValue(PlayerState.BowAttack, out var state))
+                ((PlayerBowAttackState)state).OnBowRelease();
         }
 
         /// <summary>
