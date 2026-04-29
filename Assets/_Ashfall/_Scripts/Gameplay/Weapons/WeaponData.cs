@@ -93,6 +93,24 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         [Tooltip("Duration of guard break stagger (seconds)")]
         public float guardBreakDuration = 1.5f;
 
+        // ── Bow Config ────────────────────────────────────────────────────
+
+        [TitleGroup("Bow Config")]
+        [InfoBox("comboAttacks[0] = quick shot. comboAttacks[1] = charged shot (optional — falls back to [0] if absent).")]
+        [ShowIf("@weaponType == WeaponType.Bow")]
+        [BoxGroup("Bow Config/Box")]
+        [HorizontalGroup("Bow Config/Box/Row")]
+
+        [VerticalGroup("Bow Config/Box/Row/Left"), LabelWidth(120)]
+        [Tooltip("Hold duration required to reach full charge (seconds)")]
+        [ShowIf("@weaponType == WeaponType.Bow")]
+        public float chargeTime = 0.8f;
+
+        [VerticalGroup("Bow Config/Box/Row/Right"), LabelWidth(120)]
+        [Tooltip("Arrow travel speed (units/second)")]
+        [ShowIf("@weaponType == WeaponType.Bow")]
+        public float arrowSpeed = 20f;
+
         // ── Stamina Costs ─────────────────────────────────────────────────
 
         [TitleGroup("Stamina Costs")]

@@ -1,4 +1,5 @@
 ﻿using _Ashfall._Scripts.Core.StateMachineCore;
+using _Ashfall._Scripts.Gameplay.Weapons;
 using UnityEngine;
 
 namespace _Ashfall._Scripts.Gameplay.Player.States
@@ -64,11 +65,12 @@ namespace _Ashfall._Scripts.Gameplay.Player.States
                 return;
             }
 
-            // Attack input
+            // Attack input — route to BowAttack if bow is equipped
             if (_ctx.Input.AttackPressed)
             {
                 _ctx.Input.ConsumeAttack();
-                _controller.ChangeState(PlayerState.Attack);
+                bool isBow = _ctx.Weapon?.Current?.weaponType == WeaponType.Bow;
+                _controller.ChangeState(isBow ? PlayerState.BowAttack : PlayerState.Attack);
                 return;
             }
 

@@ -27,6 +27,11 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         [Tooltip("Maps WeaponType → WeaponVisuals. Assign the WeaponVisualRegistry SO here.")]
         [SerializeField] private WeaponVisualRegistry visualRegistry;
 
+        [Tooltip("The base Animator Controller (AC_Player_Base). " +
+                 "Used as-is when WeaponVisuals.animatorOverride is null (e.g. Unarmed). " +
+                 "Its default clips should be the unarmed punch/kick animations.")]
+        [SerializeField] private RuntimeAnimatorController baseAnimatorController;
+
         [Header("Sockets")]
         [Tooltip("Transform where the weapon model is parented (e.g. right hand bone)")]
         [SerializeField] private Transform weaponSocket;
@@ -39,7 +44,7 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         /// <summary>Visual assets for the currently equipped weapon.</summary>
         public WeaponVisuals CurrentVisuals { get; private set; }
 
-        /// <summary>AnimatorOverrideController built from CurrentVisuals.animatorController.</summary>
+        /// <summary>Runtime copy of the pre-built AnimatorOverrideController from CurrentVisuals. Safe to mutate (e.g. SwapParryClip).</summary>
         public AnimatorOverrideController OverrideController { get; private set; }
 
         /// <summary>Fired after a new weapon is fully equipped. Arg = new WeaponData.</summary>
@@ -99,12 +104,30 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         {
             if (!_animator) return;
 
-            var baseController = CurrentVisuals?.animatorController
-                              ?? _animator.runtimeAnimatorController;
+            var source = CurrentVisuals?.animatorOverride;
 
-            if (baseController == null) return;
+            if (source != null)
+            {
+                // Weapon has a pre-built override controller — create a runtime copy so that
+                // runtime mutations (e.g. SwapParryClip) never affect the shared project asset.
+                OverrideController = new AnimatorOverrideController(source.runtimeAnimatorController);
 
-            OverrideController = new AnimatorOverrideController(baseController);
+                var overrides = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<AnimationClip, AnimationClip>>(source.overridesCount);
+                source.GetOverrides(overrides);
+                OverrideController.ApplyOverrides(overrides);
+            }
+            else
+            {
+                // No override (e.g. Unarmed) — wrap the base controller directly.
+                // AC_Player_Base default clips serve as the unarmed animations.
+                if (baseAnimatorController == null)
+                {
+                    Debug.LogWarning("[WeaponHandler] baseAnimatorController is not assigned — animator will not update.", this);
+                    return;
+                }
+                OverrideController = new AnimatorOverrideController(baseAnimatorController);
+            }
+
             _animator.runtimeAnimatorController = OverrideController;
         }
 

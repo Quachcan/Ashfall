@@ -1,249 +1,246 @@
-# README — Technical Overview
+# Ashfall
 
-> Game **2.5D Action Platformer / Metroidvania / Soulslike** — Unity 6.4 URP, C#, PC & Mobile
+> A 2.5D action platformer with Soulslike combat — built in Unity 6.4 URP
 
 ---
 
-## 📋 Tech Stack
+## Overview
 
-| Mục | Chi tiết |
-| --- | --- |
+Ashfall is a **2.5D Soulslike** where playstyle is defined by the weapon you carry, not a fixed class.
+The project is a vertical slice demo focused on demonstrating polished combat systems and clean code architecture.
+
+**Target scope:** 1 playable area · 2 weapon types · 2 enemy variants · 1 boss
+
+---
+
+## Tech Stack
+
+| | |
+|---|---|
 | Engine | Unity 6.4 (URP) |
-| Ngôn ngữ | C# |
-| Platform | PC & Mobile (Android/iOS) |
-| Rendering | 2.5D — 3D visuals, 2D gameplay plane |
+| Language | C# |
+| Platform | PC (Windows) |
+| Rendering | 2.5D — 3D visuals on a 2D gameplay plane (Z-axis locked Rigidbody) |
 
-**Packages chính:**
+**Key packages:**
 
-| Package | Mục đích |
-| --- | --- |
-| DOTween (Demigiant) | UI animation, tween toàn bộ |
-| Cinemachine | Camera follow, confiner theo zone |
-| TextMesh Pro | Render text |
-| Unity Input System | Input PC + Mobile, virtual joystick |
-| Odin Inspector | Inspector tooling, SerializeField helpers |
-
----
-
-## 🎮 Game Design
-
-### Nhân vật
-- **1 nhân vật duy nhất** — chọn giới tính (Nam/Nữ) khi bắt đầu
-- Playstyle thay đổi theo **vũ khí trang bị**, không theo class cố định
-
-### Weapon Types
-| Vũ khí | Playstyle | Block/Parry |
-|--------|-----------|-------------|
-| Kiếm một tay | Melee cân bằng, combo 3 đòn | ✅ Có |
-| Song kiếm | Tốc độ cao, combo dài | ❌ Chỉ dodge |
-| Gậy phép | Ranged magic, AOE, burst | ❌ Chỉ dodge |
-| Cung | Ranged vật lý, trap | ❌ Chỉ dodge |
-
-### Combat (Soulslike)
-- Không hồi HP tự động — chỉ hồi tại Grace Point hoặc dùng item
-- **Stamina** — dùng cho dash, sprint, attack, block
-- **Posture/Stagger** (Sekiro-style) — tăng khi nhận đòn, đầy → stagger → finishing blow window
-- **Block/Parry** — giữ = block (tốn stamina), bấm đúng timing = parry (stagger enemy)
-- **Damage formula** — `ATK × (100 / 100 + DEF)` (Dark Souls style)
+| Package | Purpose |
+|---|---|
+| Unity Input System | Keyboard + Gamepad input, action map |
+| Cinemachine | Camera follow, zone confinement |
+| Odin Inspector | Editor tooling, custom Inspector layouts |
+| DOTween | UI animations and tweening |
+| TextMesh Pro | Text rendering |
 
 ---
 
-## 🗂️ Cấu trúc Project
+## Gameplay
+
+### Character
+Single character with gender selection (Male / Female) at game start.
+No fixed class — playstyle changes entirely based on the equipped weapon.
+
+### Weapons
+
+| Weapon | Style | Combo | Block & Parry |
+|--------|-------|-------|---------------|
+| **Sword** | Balanced melee | 3-hit combo | ✅ Block + Parry |
+| **Bow** | Ranged physical | Tap = quick shot · Hold = charged shot | ❌ Dodge only |
+
+### Combat Systems
+- **Stamina** — shared resource for attacking, blocking, and dashing
+- **Posture / Stagger** (Sekiro-inspired) — fills on every hit received; full posture → stagger → finishing blow window
+- **Block / Parry** — hold to block (costs stamina); press at the right moment to parry (staggers attacker)
+- **Damage formula** — `ATK × (100 / (100 + DEF))` inspired by Dark Souls scaling
+- **Crit system** — per-attack crit rate and multiplier defined in `AttackData` ScriptableObjects
+- **Knockback** — strong hits lock player input and apply a physics impulse
+
+---
+
+## Architecture
+
+### Folder Structure
 
 ```
 Assets/_Ashfall/_Scripts/
 ├── Core/
-│   ├── EventCore/          SO-based pub/sub (Event<T>, VoidEvent, EventHub)
 │   ├── StateMachineCore/   Generic FSM (StateMachine<TEnum>, IState)
-│   ├── PoolingCore/        Object pool (Pooler<T>, IPoolable)
-│   ├── ServiceLocator/     DI container
-│   ├── AudioCore/          AudioManager, AudioBank, AudioCue SO
-│   ├── Scene/              SceneLoader, ZoneSpawnPoint, ISceneService
-│   ├── UICore/             BaseUi, UiButtonFX, DynamicCanvasScaler
-│   └── Bootstrap/          BootstrapLoader, EditorBootstrapInjector
+│   └── PoolingCore/        Generic object pool (Pooler<T>, IPoolable)
 │
-├── Gameplay/
-│   ├── Player/
-│   │   ├── PlayerController.cs     Root MonoBehaviour, owns FSM + systems
-│   │   ├── PlayerContext.cs        Shared data container cho tất cả states
-│   │   ├── PlayerStats.cs          ScriptableObject — config per weapon type
-│   │   ├── PlayerInputHandler.cs   New Input System wrapper
-│   │   ├── PlayerState.cs          Enum: Idle/Run/Jump/Fall/Dash/Attack/...
-│   │   ├── AnimHash.cs             Cached Animator parameter hashes
-│   │   ├── StaminaSystem.cs        Pure C# — ticked bởi PlayerController
-│   │   ├── AnimatorEventBridge.cs  Forward Animator events → PlayerController
-│   │   └── States/                 1 file per state, implement IState
-│   │
-│   └── Combat/
-│       ├── IHittable.cs            Interface — anything that receives hits
-│       ├── ICombatStats.cs         Interface — exposes ATK/MAG/DEF
-│       ├── HitData.cs              SO — per-attack config (damage, knockback...)
-│       ├── HitboxWeapon.cs         Weapon collider, enable/disable per frame
-│       ├── HurtboxController.cs    Implements IHittable, routes hits
-│       ├── HurtboxZone.cs          Zone marker collider (Head/Torso/Legs)
-│       ├── HealthSystem.cs         Pure C# — HP management
-│       ├── PostureSystem.cs        Pure C# — Sekiro-style posture/stagger
-│       ├── DamageCalculator.cs     Static utility — damage formula
-│       └── DummyEnemy.cs           Test target (xóa khi có Enemy thật)
-│
-├── Systems/                        (planned)
-│   ├── SkillSystem/
-│   ├── QuestSystem/
-│   ├── Economy/
-│   └── Farming/
-│
-└── UI/
-    ├── HUD/                        (planned)
-    ├── Menus/                      (planned)
-    └── Shared/                     BaseUi, DOTween helpers
+└── Gameplay/
+    ├── Player/
+    │   ├── PlayerController.cs       Root MonoBehaviour — owns FSM and all systems
+    │   ├── PlayerContext.cs          Shared data container passed to every state
+    │   ├── PlayerStats.cs            ScriptableObject — movement, jump, dash, stamina config
+    │   ├── PlayerInputHandler.cs     New Input System adapter — states never call InputSystem directly
+    │   ├── AnimHash.cs               Cached Animator parameter hashes (avoids per-frame string lookup)
+    │   ├── StaminaSystem.cs          Pure C# — ticked manually by PlayerController
+    │   ├── HealthSystem.cs           Pure C# — HP management, event-driven
+    │   ├── PostureSystem.cs          Pure C# — Sekiro-style stagger meter
+    │   └── States/                   One file per FSM state, each implements IState
+    │
+    ├── Combat/
+    │   ├── AttackData.cs             ScriptableObject — per-hit config (damage, crit, knockback, animation)
+    │   ├── HitboxWeapon.cs           Weapon trigger collider — enabled/disabled via Animator events
+    │   ├── HurtboxController.cs      Receives hits (IHittable) — routes to Health, Posture, Rigidbody
+    │   ├── DamageCalculator.cs       Static utility — damage formula and flat damage
+    │   ├── ArrowProjectile.cs        Rigidbody projectile — spawned by BowAttackState on release
+    │   └── IHittable.cs / ICombatStats.cs   Interfaces decoupling attacker from defender
+    │
+    └── Weapons/
+        ├── WeaponData.cs             ScriptableObject — pure combat numbers (no visual assets)
+        ├── WeaponVisuals.cs          ScriptableObject — prefab, AnimatorOverrideController, arrow prefab
+        ├── WeaponVisualRegistry.cs   Maps WeaponType enum → WeaponVisuals at runtime
+        └── WeaponHandler.cs          Manages equip flow — swaps animator and model on weapon change
 ```
 
----
+### Key Design Patterns
 
-## 🏗️ Architecture — Core Patterns
+**1 — Finite State Machine**
 
-### 1. Pure C# Systems (Performance)
-Tránh nhiều MonoBehaviour.Update(). Systems là pure C#, ticked thủ công bởi owner:
+All player behaviour is modelled as an FSM. Each state is an isolated class implementing `IState` — no shared mutable state, no `if/else` chains in `Update`.
 
 ```csharp
-// PlayerController.Update() — 1 Update duy nhất
+// PlayerController.cs
+private StateMachine<PlayerState> BuildFSM()
+{
+    _states = new Dictionary<PlayerState, IState>
+    {
+        { PlayerState.Idle,       new PlayerIdleState(this, _ctx)       },
+        { PlayerState.Attack,     new PlayerAttackState(this, _ctx)     },
+        { PlayerState.BowAttack,  new PlayerBowAttackState(this, _ctx)  },
+        { PlayerState.Block,      new PlayerBlockState(this, _ctx)      },
+        // ...
+    };
+    return new StateMachine<PlayerState>(_states, PlayerState.Idle);
+}
+```
+
+**2 — Pure C# Systems**
+
+Performance-sensitive systems have no `MonoBehaviour` overhead — they are plain C# classes ticked by a single owner.
+
+```csharp
+// PlayerController.Update() — one Update call drives everything
 private void Update()
 {
-    _stamina.Tick(Time.deltaTime);   // pure C#
-    _posture.Tick(Time.deltaTime);   // pure C#
+    _stamina.Tick(Time.deltaTime);
+    _posture.Tick(Time.deltaTime);
     _fsm.Tick();
     UpdateAnimator();
 }
 ```
 
-**Rule:** Chỉ dùng MonoBehaviour khi cần Unity lifecycle hoặc Inspector serialization.
+**3 — Data / Visual Separation**
 
-### 2. Generic StateMachine
+`WeaponData` holds only combat numbers and is always in memory.
+`WeaponVisuals` holds prefabs and animation assets, loaded only when a weapon is equipped.
+The two are linked by a `WeaponType` enum — no direct SO cross-reference.
 
-```csharp
-var fsm = new StateMachine<PlayerState>(states, PlayerState.Idle);
-fsm.StateChanged += (from, to) => { };
-fsm.Initialize();
-fsm.ChangeState(PlayerState.Attack);
-fsm.Tick();        // trong Update
-fsm.FixedTick();   // trong FixedUpdate
+```
+WeaponData_Sword  ──┐
+                    ├── WeaponType.Sword ──► WeaponVisualRegistry ──► WeaponVisuals_Sword
+WeaponData_Bow    ──┘                                                  (prefab, animator, arrow)
 ```
 
-### 3. EventHub — SO-based Pub/Sub
+**4 — AnimatorOverrideController Pattern**
+
+One `AC_Player_Base` Animator Controller contains all states with placeholder clips.
+Each weapon has a pre-built `AnimatorOverrideController` asset in the Editor that swaps
+only the clips relevant to that weapon. `WeaponHandler` creates a **runtime copy** on equip
+so that clip mutations (e.g. random parry clip selection) never affect the shared project asset.
 
 ```csharp
-// Subscribe (OnEnable):
-eventHub.playerEvents.onPlayerDead.Subscribe(OnPlayerDead);
-
-// Raise:
-eventHub.playerEvents.onPlayerDead.Raise();
-
-// Unsubscribe (OnDisable — bắt buộc):
-eventHub.playerEvents.onPlayerDead.Unsubscribe(OnPlayerDead);
+// WeaponHandler.SwapAnimator()
+OverrideController = new AnimatorOverrideController(source.runtimeAnimatorController);
+source.GetOverrides(overrides);
+OverrideController.ApplyOverrides(overrides);   // copy — asset untouched
+_animator.runtimeAnimatorController = OverrideController;
 ```
 
-### 4. Service Locator
+**5 — Dependency Injection (manual)**
 
-```csharp
-// Register (Awake):
-ServiceLocator.Register<IWalletService>(this);
-
-// Consume:
-ServiceLocator.Get<IWalletService>()?.AddAsh(100);
-
-// Unregister (OnDestroy):
-ServiceLocator.Unregister<IWalletService>();
-```
-
-### 5. Dependency Injection Pattern
-Systems không dùng GetComponent — được inject bởi owner:
+Systems are created and injected by their owner — no `GetComponent` chains, no singletons.
 
 ```csharp
 // PlayerController.Awake()
 _health  = new HealthSystem(stats.maxHp);
 _stamina = new StaminaSystem(stats);
-_posture = new PostureSystem(...);
-_hurtbox.Initialize(_rb, _health, this, _posture); // inject
+_posture = new PostureSystem(stats.maxPosture, ...);
+_hurtbox.Initialize(_rb, _health, this, _posture);   // inject all dependencies
 ```
 
-### 6. Object Pooler
-
-```csharp
-var fx = fxPool.GetFromPool(spawnPos, rotation);
-// Object tự return về pool qua IPoolableWithInit<T>
-```
-
----
-
-## 🔗 Dependency Tree (Current)
+### System Dependency Map
 
 ```
-PlayerController (MonoBehaviour)
-├── PlayerInputHandler      reads New Input System
-├── PlayerContext           shared data — passed to all states
-├── StaminaSystem (C#)      ticked by PlayerController
-├── HealthSystem (C#)       ticked by PlayerController, event-driven
-├── PostureSystem (C#)      ticked by PlayerController
-├── AnimatorOverrideController  random parry clips
+PlayerController
+├── PlayerInputHandler     — New Input System adapter
+├── PlayerContext          — shared data bag for all states
+├── StaminaSystem (C#)     — ticked every Update
+├── HealthSystem (C#)      — event: OnDeath → FSM.ChangeState(Dead)
+├── PostureSystem (C#)     — event: OnStagger → stagger state
+├── WeaponHandler          — equip flow, AnimatorOverrideController
 └── StateMachine<PlayerState>
-      └── States: Idle, Run, Jump, Fall, Dash, Attack,
-                  CrouchIdle, CrouchWalk, Block, Parry,
-                  GuardBreak, Dead
+      └── 14 states: Idle · Run · Jump · Fall · Dash
+                     Attack · BowAttack
+                     CrouchIdle · CrouchWalk
+                     Block · Parry · GuardBreak
+                     Knockback · Dead
 
-HurtboxController (MonoBehaviour)
-├── IHittable               receives TakeHit() from HitboxWeapon
-├── HealthSystem (injected)
-├── PostureSystem (injected)
-└── ICombatStats (injected) for DEF calculation
+HurtboxController (on Player root)
+├── IHittable              — receives TakeHit() from HitboxWeapon / ArrowProjectile
+├── HealthSystem (ref)     — applies final damage
+├── PostureSystem (ref)    — applies posture damage
+└── ICombatStats (ref)     — reads DEF for damage reduction
 
-HitboxWeapon (MonoBehaviour, on weapon bone)
-└── OnTriggerEnter → GetHittableRoot → IHittable.TakeHit()
-      └── DamageCalculator.Calculate(ATK, DEF, type, zoneMultiplier)
+HitboxWeapon (on weapon bone)
+└── OnTriggerEnter → HurtboxController.TakeHit(AttackData, hitPoint, direction, attacker)
+      └── DamageCalculator.Calculate(ATK, DEF, DamageType)
 ```
 
 ---
 
-## ⚙️ Scene Structure
+## Coding Conventions
 
-```
-Bootstrap (loads first, unloads after)
-└── loads Persistent (additive, never unloads)
-    ├── PlayerController    lives here — không destroy khi zone transition
-    ├── AudioManager
-    ├── SceneLoader         handles zone transitions + fade
-    └── [Zone Scene]        loaded/unloaded additively per zone
-```
-
----
-
-## 📝 Coding Conventions
-
-| Rule | Detail |
-|------|--------|
-| **Namespace** | `_Ashfall._Scripts.*` |
-| **No prefix** | Không dùng prefix script (AF_, v.v.) |
-| **Comments** | English |
-| **Events** | Dùng `eventHub.*` — không dùng C# event trực tiếp (trừ internal systems) |
-| **Services** | `ServiceLocator.Get<T>()` — luôn null-check (`?.`) |
-| **StateMachine** | Mỗi state là 1 class riêng implement `IState` |
-| **Unsubscribe** | Luôn unsubscribe EventHub trong `OnDisable` |
-| **TimeScale** | Chỉ `GameManager` quản lý `Time.timeScale` |
-| **Pooler** | Mọi object spawn nhiều lần đều dùng pool |
-| **SO** | ItemData, SkillData, QuestData, EnemyData đều là ScriptableObject |
-| **Physics** | `rb.linearVelocity` (Unity 6), `FindObjectsByType` dùng `FindObjectsInactive` |
-| **Pure C#** | Systems không cần Unity lifecycle → pure C#, ticked bởi owner |
+| Convention | Rule |
+|---|---|
+| Namespace | `_Ashfall._Scripts.*` |
+| Language | English only in source files |
+| State pattern | One class per state, implements `IState` |
+| Input | States read from `PlayerInputHandler` — never call `InputSystem` directly |
+| Animator | All parameter hashes cached in `AnimHash.cs` — no runtime string hashing |
+| Systems | No `MonoBehaviour` unless Unity lifecycle or Inspector serialization is required |
+| Null safety | Null-guard at state `Enter()` — log error and transition to safe state |
+| Physics | `rb.linearVelocity` (Unity 6 API), Z-axis frozen on all character Rigidbodies |
 
 ---
 
-## 🌿 Branch Convention
+## Project Status
 
-| Branch | Mục đích |
-|--------|----------|
-| `main` | Production — stable |
-| `develop` | Integration branch |
-| `feature/<tên>` | Tính năng mới |
-| `fix/<tên>` | Bug fix |
-| `claude/<tên>` | AI-assisted development |
+### Implemented ✅
+- Full player FSM (14 states)
+- Melee combo system (3-hit, per-hit AttackData, input buffering)
+- Bow ranged attack (charge mechanic, quick shot / charged shot, ArrowProjectile)
+- Block · Parry · Guard Break pipeline
+- Knockback state
+- Dash with i-frames
+- Crouch (idle + walk)
+- Double jump + coyote time
+- Stamina system (regeneration, depletion, exhaustion)
+- Health system (event-driven death)
+- Posture / Stagger system (Sekiro-inspired)
+- Damage pipeline (Physical / Magic / True damage types, crit, knockback)
+- Weapon equip system (WeaponData + WeaponVisuals + AnimatorOverrideController)
+- Weapon hot-swap at runtime
 
+### In Progress 🔄
+- Enemy AI (patrol, detection, attack)
+- Level design — first area blockout
+- HUD (HP bar, stamina bar, posture indicator)
 
-*Unity 6.4 · C# · PC & Mobile · DOTween · Cinemachine · TextMesh Pro · Odin Inspector*
+### Planned 📋
+- Boss fight
+- Grace Point respawn system
+- Camera polish (combat zoom, hit shake)
+- VFX + SFX integration
+- Game feel pass (hit stop, screen shake, particle on hit)

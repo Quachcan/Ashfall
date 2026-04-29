@@ -8,11 +8,18 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
     /// Intentionally separate from WeaponData so that combat data (stats, combo, block)
     /// never forces visual assets into memory.
     ///
-    /// WeaponData  = pure numbers, always loaded, tiny memory footprint.
+    /// WeaponData    = pure numbers, always loaded, tiny memory footprint.
     /// WeaponVisuals = prefabs + animations, loaded only when weapon is equipped.
     ///
     /// The link between the two is WeaponType enum — no direct SO reference.
     /// WeaponVisualRegistry maps WeaponType → WeaponVisuals at runtime.
+    ///
+    /// Animation override pattern:
+    ///   Create one AnimatorOverrideController asset per weapon in the Editor
+    ///   (e.g. AC_Override_Sword, AC_Override_Bow), each linked to AC_Player_Base.
+    ///   Swap placeholder clips → real clips directly in Unity's Inspector.
+    ///   WeaponHandler creates a runtime copy on equip so the shared asset is never mutated
+    ///   (required because SwapParryClip() modifies the controller at runtime).
     ///
     /// Future migration: replace serialized fields with Addressable AssetReferences
     /// for true on-demand loading without changing any other system.
@@ -43,20 +50,30 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
         // ── Animation ─────────────────────────────────────────────────────
 
         [TitleGroup("Animation")]
-        [Tooltip("Full AnimatorController for this weapon — replaces player animator on equip")]
-        public RuntimeAnimatorController animatorController;
+        [Tooltip("Pre-built AnimatorOverrideController for this weapon — linked to AC_Player_Base with clips already swapped in the Editor")]
+        public AnimatorOverrideController animatorOverride;
+
+        // ── Parry (melee only) ────────────────────────────────────────────
 
         [TitleGroup("Animation")]
         [BoxGroup("Animation/Parry")]
         [InfoBox("Only needed if WeaponData.canBlock = true.")]
 
         [BoxGroup("Animation/Parry")]
-        [Tooltip("Pool of parry clips — one is picked randomly each parry")]
+        [Tooltip("Pool of parry clips — one is picked randomly each parry to add variety")]
         public AnimationClip[] parryClips;
 
         [BoxGroup("Animation/Parry")]
-        [Tooltip("The placeholder clip in the Animator used as the override key")]
+        [Tooltip("The placeholder clip in the override controller used as the key for runtime parry swaps")]
         public AnimationClip parryStateClip;
+
+        // ── Bow ───────────────────────────────────────────────────────────
+
+        [TitleGroup("Bow")]
+        [InfoBox("Only needed when weaponType = Bow.")]
+        [ShowIf("@weaponType == WeaponType.Bow")]
+        [Tooltip("Arrow projectile prefab — requires Rigidbody, CapsuleCollider (trigger), and ArrowProjectile component")]
+        public GameObject arrowPrefab;
 
         // ── VFX (future) ──────────────────────────────────────────────────
         // public GameObject hitVfxPrefab;
