@@ -25,7 +25,7 @@ namespace _Ashfall._Scripts.Gameplay.Player
         [SerializeField] private PlayerStats stats;
 
         [Header("Bow")]
-        [Tooltip("Child Transform trên prefab player — vị trí spawn mũi tên (gần tay cầm cung)")]
+        [Tooltip("Child Transform on the player prefab — world-space arrow spawn point (near the bow hand tip)")]
         [SerializeField] private Transform arrowSpawnPoint;
 
         [Header("Debug")]
