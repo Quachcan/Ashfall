@@ -123,6 +123,19 @@ namespace _Ashfall._Scripts.Core.StateMachineCore
             if (!_isInitialized) return;
             _currentStateImplementation?.FixedTick();
         }
+        
+        /// <summary>
+        /// Retrieves a specific state instance by its enum key.
+        /// Useful for modifying state-specific variables before transitioning.
+        /// </summary>
+        public T GetState<T>(TState stateEnum) where T : class, IState
+        {
+            if (_states.TryGetValue(stateEnum, out var stateImpl))
+            {
+                return stateImpl as T;
+            }
+            return null;
+        }
 
         private void SafeCall(Action action, string context)
         {

@@ -1,107 +1,59 @@
 ﻿using _Ashfall._Scripts.Core.StateMachineCore;
 using UnityEngine;
+using DG.Tweening;
 
 namespace _Ashfall._Scripts.Gameplay.Player.States
 {
-    /// <summary>
-    /// Player performs a quick dash in the facing direction.
-    /// Freezes vertical velocity during the dash for a clean horizontal feel.
-    /// Includes an invincibility frame window (i-frame) hook for the combat system later.
-    /// Transitions: dash ends + grounded → Idle/Run | dash ends + airborne → Fall
-    /// </summary>
     public class PlayerDashState : IState
     {
         private readonly PlayerController _controller;
         private readonly PlayerContext    _ctx;
 
-        private float _dashTimer;
+        public bool IsDashingToEnemy;
+        private const float ENGAGE_DISTANCE = 1.5f; 
+        private Vector3 _homePosition;
 
         public PlayerDashState(PlayerController controller, PlayerContext ctx)
         {
             _controller = controller;
             _ctx        = ctx;
+            _homePosition = _ctx.Transform.position;
         }
 
         public void Enter()
         {
-            _dashTimer = _ctx.Stats.dashDuration;
-
-            // Spend stamina — guaranteed to succeed because DashState is only entered
-            // after Has(dashCost) check in the originating state
-            _ctx.Stamina.TrySpendDash();
-
-            // Arm cooldown immediately so it ticks even if the state exits early
-            _ctx.IsDashOnCooldown  = true;
-            _ctx.DashCooldownTimer = _ctx.Stats.dashCooldown;
-
-            // Apply dash velocity — freeze Y so the dash is purely horizontal
-            Vector3 v = _ctx.Rb.linearVelocity;
-            v.x = _ctx.FacingDirection * _ctx.Stats.dashSpeed;
-            v.y = 0f;
-            _ctx.Rb.linearVelocity = v;
-
-            // Disable gravity during dash for consistent distance
-            _ctx.Rb.useGravity = false;
+            if (_homePosition == Vector3.zero) _homePosition = _ctx.Transform.position;
 
             _ctx.AnimMoveSpeed = 0f;
             _ctx.Animator?.SetTrigger(AnimHash.Dash);
 
-            _ctx.Hurtbox?.SetInvincible(true, _ctx.Stats.dashDuration);
+            Vector3 targetPos = CalculateTargetPosition();
+
+            _ctx.Transform.DOMove(targetPos, _ctx.Stats.dashDuration)
+                .SetEase(Ease.OutCubic)
+                .OnComplete(OnDashComplete);
         }
 
-        public void Exit()
-        {
-            // Re-enable gravity when dash ends
-            _ctx.Rb.useGravity = true;
-
-            // Dash always exits to standing states — clear crouch regardless of how dash was entered
-            _ctx.Input.ClearCrouch();
-
-            _ctx.Hurtbox?.SetInvincible(false);
-        }
-
-        public void Tick()
-        {
-            _dashTimer -= Time.deltaTime;
-
-            if (_dashTimer <= 0f)
-                EndDash();
-        }
-
+        public void Exit() { }
+        public void Tick() { }
         public void FixedTick() { }
 
-        // ── Helpers ───────────────────────────────────────────────────────
-
-        private void EndDash()
+        private Vector3 CalculateTargetPosition()
         {
-            // Bleed off dash speed
-            Vector3 v = _ctx.Rb.linearVelocity;
-            v.x = _ctx.FacingDirection * _ctx.Stats.runSpeed;
-            _ctx.Rb.linearVelocity = v;
+            if (!IsDashingToEnemy) return _homePosition;
 
-            bool hasInput = Mathf.Abs(_ctx.Input.MoveX) > 0.1f;
+            Vector3 enemyPos = new Vector3(5f, _homePosition.y, _homePosition.z);
+            float dirToPlayer = Mathf.Sign(_homePosition.x - enemyPos.x);
 
-            if (!_ctx.IsGrounded)
-            {
-                _controller.ChangeState(PlayerState.Fall);
-                return;
-            }
+            Vector3 engagePos = enemyPos;
+            engagePos.x += dirToPlayer * ENGAGE_DISTANCE;
+            
+            return engagePos;
+        }
 
-            if (hasInput && _ctx.Input.DashHeld)
-            {
-                // Still holding Shift after dash → transition into sprint
-                _ctx.Input.ConsumeSprint();
-                _ctx.Input.SprintHeld = true; // manually activate sprint
-                _controller.ChangeState(PlayerState.Run);
-            }
-            else if (hasInput)
-            {
-                _controller.ChangeState(PlayerState.Run);
-            }
-            else
-            {
-                _controller.ChangeState(PlayerState.Idle);
-            }
+        private void OnDashComplete()
+        {
+            _controller.ChangeState(IsDashingToEnemy ? PlayerState.Attack : PlayerState.Idle);
         }
     }
 }

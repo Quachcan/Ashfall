@@ -3475,8 +3475,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Player.PlayerController
   stats: {fileID: 11400000, guid: 41d97ace463137a419689b04c073dc86, type: 2}
   arrowSpawnPoint: {fileID: 1556691206}
-  showGroundGizmo: 1
-  showWallGizmo: 1
 --- !u!114 &714634102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3489,7 +3487,77 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fd6fc55596543e48e8efd8142fd0d10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Player.PlayerInputHandler
+  <MoveX>k__BackingField: 0
+  <JumpPressed>k__BackingField: 0
+  <JumpHeld>k__BackingField: 0
+  <DashPressed>k__BackingField: 0
+  <DashHeld>k__BackingField: 0
+  <SprintHeld>k__BackingField: 0
+  <AttackPressed>k__BackingField: 0
+  <AttackHeld>k__BackingField: 0
+  <AttackReleased>k__BackingField: 0
+  <BlockHeld>k__BackingField: 0
+  <BlockPressed>k__BackingField: 0
+  <BlockReleased>k__BackingField: 0
+  <CrouchToggled>k__BackingField: 0
+  <IsCrouching>k__BackingField: 0
   jumpBufferTime: 0.1
+  _jumpBufferTimer: 0
+  _playerInput: {fileID: 0}
+  _moveAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: f1c4305b-6a09-45bc-a616-0f59bd0ee6c2
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  _jumpAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 482930f0-5055-4622-b61f-dd5ff875f6f0
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  _dashAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: fd631709-86f7-4f0f-aea1-da84e6b9391d
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  _attackAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 0088b325-f585-457e-8c29-5a9ec4bb1a4d
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  _crouchAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 3f84a27d-d2fd-4b4b-8310-f6ce01d1dab6
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  _blockAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: b7bd4fa4-1de1-4922-b792-4438112f8a8e
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
 --- !u!114 &714634103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3614,6 +3682,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxController
   blockZone: {fileID: 0}
+  _isInvincible: 0
+  _isBlocking: 0
+  _invincibleTimer: 0
+  _rb: {fileID: 0}
 --- !u!114 &714634109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3626,7 +3698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1765fe58d47e2564f897b3aefa908db0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Weapons.WeaponHandler
-  defaultWeapon: {fileID: 11400000, guid: 3fa2333936a6c534697e4cc3969e95d1, type: 2}
+  defaultWeapon: {fileID: 11400000, guid: 2f6e2f8122e1a754bbb2f24fecba9cd5, type: 2}
   visualRegistry: {fileID: 11400000, guid: 3bc2131c588345a4abe4867b518a0b5c, type: 2}
   baseAnimatorController: {fileID: 9100000, guid: c581d4b9ef217704e949388e4db3c286, type: 2}
   weaponSocket: {fileID: 8221611949496830507}
@@ -4093,6 +4165,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HurtboxController
   blockZone: {fileID: 0}
+  _isInvincible: 0
+  _isBlocking: 0
+  _invincibleTimer: 0
+  _rb: {fileID: 0}
 --- !u!114 &1924629924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8543,63 +8619,6 @@ Transform:
   - {fileID: 4105877439042576792}
   m_Father: {fileID: 7808729152856773309}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &3669182060175152779
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 2.78327
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 2.44
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.57462
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3217679949165275212, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6219061595747605901, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
-      propertyPath: m_Name
-      value: ArrowBasic
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 641fbd5baefe38b408c5a4499c54bf6c, type: 3}
 --- !u!137 &3719194670588756272
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0
@@ -10670,8 +10689,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.HitboxWeapon
   attackData: {fileID: 0}
   targetLayer:
-    serializedVersion: 2
     m_Bits: 1024
+  _isActive: 0
+  _collider: {fileID: 0}
+  _owner: {fileID: 0}
 --- !u!4 &5162446295256725026
 Transform:
   m_ObjectHideFlags: 0
@@ -15537,4 +15558,3 @@ SceneRoots:
   - {fileID: 714634099}
   - {fileID: 1514974196}
   - {fileID: 1924629920}
-  - {fileID: 3669182060175152779}

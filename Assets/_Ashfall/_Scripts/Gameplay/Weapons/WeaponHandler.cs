@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace _Ashfall._Scripts.Gameplay.Weapons
@@ -112,7 +113,7 @@ namespace _Ashfall._Scripts.Gameplay.Weapons
                 // runtime mutations (e.g. SwapParryClip) never affect the shared project asset.
                 OverrideController = new AnimatorOverrideController(source.runtimeAnimatorController);
 
-                var overrides = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<AnimationClip, AnimationClip>>(source.overridesCount);
+                var overrides = new List<System.Collections.Generic.KeyValuePair<AnimationClip, AnimationClip>>(source.overridesCount);
                 source.GetOverrides(overrides);
                 OverrideController.ApplyOverrides(overrides);
             }

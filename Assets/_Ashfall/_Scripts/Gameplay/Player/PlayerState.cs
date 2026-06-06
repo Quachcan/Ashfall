@@ -6,18 +6,12 @@
     public enum PlayerState 
     {
         Idle,
-        Run,
-        Jump,
-        Fall,
+        Move,
         Dash,
         Attack,
-        BowAttack,
-        CrouchIdle,
-        CrouchWalk,
         Block,
-        Parry,
+        TakeHit,
         GuardBreak,
-        Knockback,
         Dead
     }
 }

@@ -17,7 +17,13 @@ MonoBehaviour:
   atk: 5
   mag: 0
   def: 0
-  comboAttacks: []
+  comboAttacks:
+  - {fileID: 11400000, guid: 676caa87061a37e48ab92a0b54eae72e, type: 2}
+  - {fileID: 11400000, guid: 87cf0fdfec9fa514da19c7003669f669, type: 2}
+  - {fileID: 11400000, guid: a60ef48b8ed4f1346ac4799636681c36, type: 2}
+  - {fileID: 11400000, guid: 0e9ae19de8e6c5d44b427a1ef3acb38a, type: 2}
+  - {fileID: 11400000, guid: 7a43aff9ad8bdd9458aa8a819c74b0f9, type: 2}
+  - {fileID: 11400000, guid: 94646b47992f41d4faec36956a48e6d8, type: 2}
   canBlock: 0
   blockDamageReduction: 0.7
   parryWindowTime: 0.3
