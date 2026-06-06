@@ -104,14 +104,14 @@ namespace _Ashfall._Scripts.Gameplay.Combat.Testing
             if (_health.IsDead) return;
             if (_status == "Staggered") return;
 
-            if (data.causesKnockback)
-            {
-                StartCoroutine(KnockbackRoutine(data.knockbackDuration));
-            }
-            else
-            {
-                PlayHitReact();
-            }
+            // if (data.causesKnockback)
+            // {
+            //     StartCoroutine(KnockbackRoutine(data.knockbackDuration));
+            // }
+            // else
+            // {
+            //     PlayHitReact();
+            // }
         }
 
         private void PlayHitReact()
