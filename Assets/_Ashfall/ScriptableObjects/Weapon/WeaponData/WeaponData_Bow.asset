@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f1b56cf27ae48145aef0a32ccda0729, type: 3}
+  m_Name: WeaponData_Bow
+  m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Weapons.WeaponData
+  weaponName: Bow_1
+  weaponType: 4
+  atk: 20
+  mag: 0
+  def: 0
+  comboAttacks:
+  - {fileID: 11400000, guid: 9ec2de6218b791b4f84b3bd35faba0d8, type: 2}
+  - {fileID: 11400000, guid: 8c7ea954cb63bc245b33eb821b5f12ba, type: 2}
+  - {fileID: 11400000, guid: dfb9cb075ab18ab4baefcacf6a69968b, type: 2}
+  - {fileID: 11400000, guid: 5ecda6e5df0009246bcd60fbe34c9596, type: 2}
+  canBlock: 0
+  blockDamageReduction: 0.7
+  parryWindowTime: 0.3
+  parryActiveDuration: 0.3
+  guardBreakDuration: 1.5
+  chargeTime: 0.8
+  arrowSpeed: 20
+  attackStaminaCost: 20
+  blockStaminaCost: 15

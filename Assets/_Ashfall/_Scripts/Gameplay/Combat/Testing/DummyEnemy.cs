@@ -1,15 +1,15 @@
 ﻿using System.Collections;
+using _Ashfall._Scripts.Gameplay.Stats;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace _Ashfall._Scripts.Gameplay.Combat
+namespace _Ashfall._Scripts.Gameplay.Combat.Testing
 {
     /// <summary>
     /// Test dummy — stands still, receives hits, plays reactions.
     /// No FSM, no AI. Delete when real Enemy is implemented.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
-    [RequireComponent(typeof(HurtboxController))]
     public class DummyEnemy : MonoBehaviour, ICombatStats
     {
         // ── Inspector ─────────────────────────────────────────────────────
@@ -46,7 +46,6 @@ namespace _Ashfall._Scripts.Gameplay.Combat
         [ShowInInspector, ReadOnly] private string _status = "Idle";
 
         private Rigidbody         _rb;
-        private HurtboxController _hurtbox;
         private HealthSystem      _health;
         private PostureSystem     _posture;
 
@@ -55,7 +54,6 @@ namespace _Ashfall._Scripts.Gameplay.Combat
         private void Awake()
         {
             _rb      = GetComponent<Rigidbody>();
-            _hurtbox = GetComponent<HurtboxController>();
 
             if (!animator) animator = GetComponentInChildren<Animator>();
 
@@ -69,7 +67,6 @@ namespace _Ashfall._Scripts.Gameplay.Combat
             _health.OnDeath += () =>
             {
                 _status = "Dead";
-                _hurtbox.SetInvincible(true);
                 animator?.SetTrigger("Dead");
                 Debug.Log("[Dummy] Dead.");
             };
@@ -90,9 +87,6 @@ namespace _Ashfall._Scripts.Gameplay.Combat
 
             _posture.OnFinishingBlow += () =>
                 Debug.Log("[Dummy] Finishing blow!");
-
-            _hurtbox.Initialize(_rb, _health, this, _posture);
-            _hurtbox.OnHitReceived += OnHitReceived;
         }
 
         private void Update()
@@ -155,7 +149,6 @@ namespace _Ashfall._Scripts.Gameplay.Combat
             StopAllCoroutines();
             _health.Revive(maxHp);
             _posture.Reset();
-            _hurtbox.SetInvincible(false);
             _rb.linearVelocity  = Vector3.zero;
             _rb.angularVelocity = Vector3.zero;
             _status = "Idle";

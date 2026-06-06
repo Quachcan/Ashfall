@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d753bd6c8714746b4af6bb1e9049ff53, type: 3}
   m_Name: AttackData_Bow_Attack_1
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Combat.AttackData
-  attackName: Attack
-  isComboAttack: 0
+  attackName: Quickshot_1
+  isComboAttack: 1
   isSpecialAttack: 0
   animStateName: Bow_Attack_1
   attackDuration: 0.4

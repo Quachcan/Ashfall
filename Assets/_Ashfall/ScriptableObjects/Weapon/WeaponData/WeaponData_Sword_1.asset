@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: WeaponData_Sword_1
   m_EditorClassIdentifier: Assembly-CSharp::_Ashfall._Scripts.Gameplay.Weapons.WeaponData
   weaponName: Weapon
-  weaponType: 0
+  weaponType: 1
   atk: 20
   mag: 0
   def: 0
-  attackMoveScale: 0.1
   comboAttacks:
   - {fileID: 11400000, guid: 82469deddc4ac9e45be6281812bfb1e7, type: 2}
   - {fileID: 11400000, guid: 6e3a5ef2bde10044893e027bc07ba398, type: 2}
@@ -27,5 +26,7 @@ MonoBehaviour:
   parryWindowTime: 0.3
   parryActiveDuration: 0.3
   guardBreakDuration: 1.5
+  chargeTime: 0.8
+  arrowSpeed: 20
   attackStaminaCost: 20
   blockStaminaCost: 15
